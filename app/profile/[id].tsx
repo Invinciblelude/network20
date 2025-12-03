@@ -51,9 +51,10 @@ export default function ProfileDetailScreen() {
   const getProfileUrl = () => {
     if (!profile) return '';
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      // Use current domain (works for localhost, thenetwork20.com, etc.)
       return `${window.location.origin}/profile/${profile.id}`;
     }
-    return `network20://profile/${profile.id}`;
+    return `https://thenetwork20.com/profile/${profile.id}`;
   };
 
   const handleShare = async () => {
