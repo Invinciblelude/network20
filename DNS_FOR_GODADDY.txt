@@ -1,0 +1,31 @@
+DNS RECORDS TO ADD IN GODADDY:
+
+Location: GoDaddy → My Products → Domains → thenetwork20.com → DNS
+
+RECORD 1:
+Type: A
+Name: @
+Value: [YOUR_HOSTING_IP_FROM_GODADDY]
+TTL: 600
+
+RECORD 2:
+Type: A
+Name: www
+Value: [SAME_IP_AS_RECORD_1]
+TTL: 600
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+TO FIND YOUR IP:
+1. GoDaddy → My Products → Web Hosting → Manage
+2. Look for "IP Address" or "Server Details"
+3. Copy that IP address
+4. Use it in both DNS records above
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AFTER ADDING DNS:
+1. Upload files from /Users/invinciblelude/network20/dist/ to GoDaddy public_html/
+2. Wait 15-30 minutes for DNS to propagate
+3. Visit https://thenetwork20.com
+
