@@ -15,7 +15,7 @@ import { Link, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius, typography } from '../src/lib/theme';
 import { Avatar, Card, Chip, Badge, Button } from '../src/components/ui';
-import { getProfiles, getCurrentUser, type Profile } from '../src/lib/store';
+import { getProfiles, getCurrentUser, isUsingSupabase, type Profile } from '../src/lib/store';
 
 const { width } = Dimensions.get('window');
 
@@ -91,6 +91,14 @@ export default function HomeScreen() {
                 style={styles.cardsButton}
               >
                 <Ionicons name="card-outline" size={20} color={colors.textPrimary} />
+              </Pressable>
+            )}
+            {!currentUser && isUsingSupabase() && (
+              <Pressable
+                onPress={() => router.push('/auth/login')}
+                style={styles.loginButton}
+              >
+                <Text style={styles.loginButtonText}>Sign In</Text>
               </Pressable>
             )}
             <Pressable
@@ -355,6 +363,19 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bgElevated,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  loginButton: {
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radius.md,
+    backgroundColor: colors.bgCard,
+    borderWidth: 1,
+    borderColor: colors.primary,
+  },
+  loginButtonText: {
+    color: colors.primary,
+    fontSize: typography.sizes.sm,
+    fontWeight: '600',
   },
   profileButton: {
     padding: 2,

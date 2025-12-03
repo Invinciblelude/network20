@@ -1,17 +1,34 @@
-// Local storage for profiles when Supabase isn't configured
+/**
+ * Data Store - Unified data layer with Supabase and local fallback
+ * 
+ * This module provides a seamless data layer that:
+ * - Uses Supabase when configured for real backend persistence
+ * - Falls back to AsyncStorage for local-only operation
+ * - Maintains the same API regardless of backend
+ */
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { Profile, ProfileInsert, ProfileUpdate } from './supabase';
+import * as SupabaseAPI from './supabase';
+import type { Profile, ProfileInsert, ProfileUpdate, SocialLink } from './database.types';
 
+// Re-export types
+export type { Profile, ProfileInsert, ProfileUpdate, SocialLink };
+
+// Check if we're using Supabase or local storage
+const useSupabase = SupabaseAPI.isSupabaseConfigured;
+
+// Local storage keys
 const PROFILES_KEY = 'network20_profiles';
 const CURRENT_USER_KEY = 'network20_current_user';
 
-// Generate a simple ID
+// ============================================
+// LOCAL STORAGE HELPERS
+// ============================================
+
 function generateId(): string {
-  return `user_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
+  return `local_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 }
 
-// Get all profiles
-export async function getProfiles(): Promise<Profile[]> {
+async function getLocalProfiles(): Promise<Profile[]> {
   try {
     const data = await AsyncStorage.getItem(PROFILES_KEY);
     return data ? JSON.parse(data) : [];
@@ -20,19 +37,53 @@ export async function getProfiles(): Promise<Profile[]> {
   }
 }
 
-// Get single profile by ID
+async function saveLocalProfiles(profiles: Profile[]): Promise<void> {
+  await AsyncStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
+}
+
+// ============================================
+// UNIFIED API - These work with both backends
+// ============================================
+
+/**
+ * Get all profiles (public profiles from Supabase, or all from local)
+ */
+export async function getProfiles(): Promise<Profile[]> {
+  if (useSupabase) {
+    return SupabaseAPI.getProfiles();
+  }
+  return getLocalProfiles();
+}
+
+/**
+ * Get a single profile by ID
+ */
 export async function getProfile(id: string): Promise<Profile | null> {
-  const profiles = await getProfiles();
+  if (useSupabase) {
+    return SupabaseAPI.getProfile(id);
+  }
+  
+  const profiles = await getLocalProfiles();
   return profiles.find(p => p.id === id) || null;
 }
 
-// Create profile
-export async function createProfile(data: Omit<ProfileInsert, 'id'>): Promise<Profile> {
-  const profiles = await getProfiles();
+/**
+ * Create a new profile
+ */
+export async function createProfile(data: Omit<ProfileInsert, 'id' | 'user_id'>): Promise<Profile> {
+  if (useSupabase) {
+    const profile = await SupabaseAPI.createProfile(data);
+    if (!profile) throw new Error('Failed to create profile');
+    return profile;
+  }
+  
+  // Local storage creation
+  const profiles = await getLocalProfiles();
   const now = new Date().toISOString();
   
   const newProfile: Profile = {
     id: generateId(),
+    user_id: null,
     display_name: data.display_name,
     tagline: data.tagline || null,
     skills: data.skills || [],
@@ -48,20 +99,27 @@ export async function createProfile(data: Omit<ProfileInsert, 'id'>): Promise<Pr
     avatar_url: data.avatar_url || null,
     resume_url: data.resume_url || null,
     is_available: data.is_available ?? true,
+    is_public: data.is_public ?? true,
     created_at: now,
     updated_at: now,
   };
   
   profiles.unshift(newProfile);
-  await AsyncStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
+  await saveLocalProfiles(profiles);
   await AsyncStorage.setItem(CURRENT_USER_KEY, newProfile.id);
   
   return newProfile;
 }
 
-// Update profile
+/**
+ * Update an existing profile
+ */
 export async function updateProfile(id: string, data: ProfileUpdate): Promise<Profile | null> {
-  const profiles = await getProfiles();
+  if (useSupabase) {
+    return SupabaseAPI.updateProfile(id, data);
+  }
+  
+  const profiles = await getLocalProfiles();
   const index = profiles.findIndex(p => p.id === id);
   
   if (index === -1) return null;
@@ -72,18 +130,24 @@ export async function updateProfile(id: string, data: ProfileUpdate): Promise<Pr
     updated_at: new Date().toISOString(),
   };
   
-  await AsyncStorage.setItem(PROFILES_KEY, JSON.stringify(profiles));
+  await saveLocalProfiles(profiles);
   return profiles[index];
 }
 
-// Delete profile
+/**
+ * Delete a profile
+ */
 export async function deleteProfile(id: string): Promise<boolean> {
-  const profiles = await getProfiles();
+  if (useSupabase) {
+    return SupabaseAPI.deleteProfile(id);
+  }
+  
+  const profiles = await getLocalProfiles();
   const filtered = profiles.filter(p => p.id !== id);
   
   if (filtered.length === profiles.length) return false;
   
-  await AsyncStorage.setItem(PROFILES_KEY, JSON.stringify(filtered));
+  await saveLocalProfiles(filtered);
   
   const currentUser = await getCurrentUserId();
   if (currentUser === id) {
@@ -93,37 +157,18 @@ export async function deleteProfile(id: string): Promise<boolean> {
   return true;
 }
 
-// Get current user ID
-export async function getCurrentUserId(): Promise<string | null> {
-  try {
-    return await AsyncStorage.getItem(CURRENT_USER_KEY);
-  } catch {
-    return null;
-  }
-}
-
-// Set current user
-export async function setCurrentUserId(id: string | null): Promise<void> {
-  if (id) {
-    await AsyncStorage.setItem(CURRENT_USER_KEY, id);
-  } else {
-    await AsyncStorage.removeItem(CURRENT_USER_KEY);
-  }
-}
-
-// Get current user profile
-export async function getCurrentUser(): Promise<Profile | null> {
-  const id = await getCurrentUserId();
-  if (!id) return null;
-  return getProfile(id);
-}
-
-// Search profiles
+/**
+ * Search profiles by query text
+ */
 export async function searchProfiles(query: string): Promise<Profile[]> {
-  const profiles = await getProfiles();
+  if (useSupabase) {
+    return SupabaseAPI.searchProfiles(query);
+  }
+  
+  const profiles = await getLocalProfiles();
   const lowerQuery = query.toLowerCase();
   
-  return profiles.filter(p => 
+  return profiles.filter(p =>
     p.display_name.toLowerCase().includes(lowerQuery) ||
     p.tagline?.toLowerCase().includes(lowerQuery) ||
     p.skills.some(s => s.toLowerCase().includes(lowerQuery)) ||
@@ -132,9 +177,96 @@ export async function searchProfiles(query: string): Promise<Profile[]> {
   );
 }
 
-// Clear all profiles (useful for resetting)
+/**
+ * Get only available profiles
+ */
+export async function getAvailableProfiles(): Promise<Profile[]> {
+  if (useSupabase) {
+    return SupabaseAPI.getAvailableProfiles();
+  }
+  
+  const profiles = await getLocalProfiles();
+  return profiles.filter(p => p.is_available);
+}
+
+// ============================================
+// CURRENT USER MANAGEMENT
+// ============================================
+
+/**
+ * Get current user ID (local storage only - Supabase uses auth)
+ */
+export async function getCurrentUserId(): Promise<string | null> {
+  if (useSupabase) {
+    const user = await SupabaseAPI.getCurrentAuthUser();
+    if (!user) return null;
+    
+    const profile = await SupabaseAPI.getCurrentUserProfile();
+    return profile?.id || null;
+  }
+  
+  try {
+    return await AsyncStorage.getItem(CURRENT_USER_KEY);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Set current user ID (local storage only)
+ */
+export async function setCurrentUserId(id: string | null): Promise<void> {
+  if (useSupabase) {
+    // For Supabase, this is handled by auth - no-op
+    return;
+  }
+  
+  if (id) {
+    await AsyncStorage.setItem(CURRENT_USER_KEY, id);
+  } else {
+    await AsyncStorage.removeItem(CURRENT_USER_KEY);
+  }
+}
+
+/**
+ * Get current user's profile
+ */
+export async function getCurrentUser(): Promise<Profile | null> {
+  if (useSupabase) {
+    return SupabaseAPI.getCurrentUserProfile();
+  }
+  
+  const id = await getCurrentUserId();
+  if (!id) return null;
+  return getProfile(id);
+}
+
+// ============================================
+// UTILITY FUNCTIONS
+// ============================================
+
+/**
+ * Clear all local data (useful for testing/reset)
+ */
 export async function clearAllProfiles(): Promise<void> {
   await AsyncStorage.removeItem(PROFILES_KEY);
   await AsyncStorage.removeItem(CURRENT_USER_KEY);
 }
 
+/**
+ * Check if backend is using Supabase
+ */
+export function isUsingSupabase(): boolean {
+  return useSupabase;
+}
+
+// ============================================
+// AUTH RE-EXPORTS (for convenience)
+// ============================================
+
+export const signUp = SupabaseAPI.signUp;
+export const signIn = SupabaseAPI.signIn;
+export const signOut = SupabaseAPI.signOut;
+export const resetPassword = SupabaseAPI.resetPassword;
+export const onAuthStateChange = SupabaseAPI.onAuthStateChange;
+export const getCurrentAuthUser = SupabaseAPI.getCurrentAuthUser;
