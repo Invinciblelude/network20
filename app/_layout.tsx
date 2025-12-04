@@ -1,11 +1,25 @@
-import React from 'react';
-import { Stack } from 'expo-router';
+import React, { useEffect } from 'react';
+import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { View } from 'react-native';
+import { View, Platform } from 'react-native';
 import { colors } from '../src/lib/theme';
 
 export default function RootLayout() {
+  const router = useRouter();
+
+  // Handle GitHub Pages SPA redirect
+  useEffect(() => {
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const query = window.location.search;
+      if (query.startsWith('?/')) {
+        const path = query.slice(2).split('&')[0].replace(/~and~/g, '&');
+        window.history.replaceState(null, '', '/' + path);
+        router.replace('/' + path as any);
+      }
+    }
+  }, []);
+
   return (
     <SafeAreaProvider>
       <View style={{ flex: 1, backgroundColor: colors.bg }}>
