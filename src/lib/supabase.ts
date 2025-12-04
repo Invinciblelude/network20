@@ -7,9 +7,15 @@ import type { Database, Profile, ProfileInsert, ProfileUpdate, SocialLink } from
 // Re-export types for convenience
 export type { Profile, ProfileInsert, ProfileUpdate, SocialLink };
 
-// Get Supabase credentials from expo config
-const supabaseUrl = Constants.expoConfig?.extra?.supabaseUrl || process.env.EXPO_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = Constants.expoConfig?.extra?.supabaseAnonKey || process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
+// Get Supabase credentials - use process.env for web builds
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || Constants.expoConfig?.extra?.supabaseUrl || '';
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || Constants.expoConfig?.extra?.supabaseAnonKey || '';
+
+// Debug logging (remove in production)
+if (typeof window !== 'undefined') {
+  console.log('Supabase configured:', Boolean(supabaseUrl && supabaseAnonKey));
+  console.log('URL:', supabaseUrl ? 'SET' : 'NOT SET');
+}
 
 // Check if Supabase is configured
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
@@ -200,7 +206,12 @@ export async function getCurrentUserProfile(): Promise<Profile | null> {
  * Create a new profile (no auth required)
  */
 export async function createProfile(profileData: Omit<ProfileInsert, 'id' | 'user_id'>): Promise<Profile | null> {
-  if (!supabase) return null;
+  if (!supabase) {
+    console.error('Supabase not configured - cannot create profile');
+    return null;
+  }
+  
+  console.log('Creating profile in Supabase...', profileData.display_name);
   
   const { data, error } = await supabase
     .from('profiles')
@@ -216,6 +227,7 @@ export async function createProfile(profileData: Omit<ProfileInsert, 'id' | 'use
     throw error;
   }
   
+  console.log('Profile created successfully:', data?.id);
   return data;
 }
 
