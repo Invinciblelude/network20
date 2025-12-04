@@ -328,6 +328,24 @@ export default function ProfileDetailScreen() {
             </Button>
           )}
 
+          {/* Edit button for own profile */}
+          {isOwnProfile && (
+            <View style={styles.editSection}>
+              <Text style={styles.editHint}>This is your NW20 Card</Text>
+              <Button
+                onPress={() => router.push('/profile')}
+                fullWidth
+                size="lg"
+                variant="secondary"
+              >
+                <Ionicons name="pencil" size={20} color={colors.textPrimary} style={{ marginRight: 8 }} />
+                <Text style={{ color: colors.textPrimary, fontWeight: '700', fontSize: 16 }}>
+                  Edit My Card
+                </Text>
+              </Button>
+            </View>
+          )}
+
           <View style={{ height: 50 }} />
         </ScrollView>
       </SafeAreaView>
@@ -549,6 +567,18 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     marginTop: spacing.md,
     textAlign: 'center',
+  },
+  editSection: {
+    marginTop: spacing.xl,
+    paddingTop: spacing.lg,
+    borderTopWidth: 1,
+    borderTopColor: colors.bgElevated,
+    alignItems: 'center',
+  },
+  editHint: {
+    fontSize: typography.sizes.sm,
+    color: colors.textMuted,
+    marginBottom: spacing.md,
   },
 });
 
