@@ -385,39 +385,32 @@ export default function ProfileDetailScreen() {
             </View>
           )}
 
-          {/* Create Your Own Card CTA - Always show for visitors */}
+          {/* Create Your Own Card CTA - Always visible */}
           <View style={styles.createOwnCard}>
-            <Text style={styles.createOwnCardTitle}>
-              {isOwnProfile ? 'Share your NW20 Card!' : 'Want your own NW20 Card?'}
-            </Text>
+            <Text style={styles.createOwnCardTitle}>Create Your Own NW20 Card</Text>
             <Text style={styles.createOwnCardSubtitle}>
-              {isOwnProfile 
-                ? 'Share the QR code or link above to connect with others'
-                : 'Create a free digital work card in 60 seconds'
-              }
+              Free digital work card in 60 seconds
             </Text>
-            {!isOwnProfile && (
-              <Button
-                onPress={() => router.push('/create')}
-                fullWidth
-                size="lg"
-                style={{ marginTop: spacing.md }}
-              >
-                <Ionicons name="add-circle" size={20} color={colors.textInverse} style={{ marginRight: 8 }} />
-                <Text style={{ color: colors.textInverse, fontWeight: '700', fontSize: 16 }}>
-                  Create My NW20 Card
-                </Text>
-              </Button>
-            )}
+            <Button
+              onPress={() => router.push('/create')}
+              fullWidth
+              size="lg"
+              style={{ marginTop: spacing.md }}
+            >
+              <Ionicons name="add-circle" size={20} color={colors.textInverse} style={{ marginRight: 8 }} />
+              <Text style={{ color: colors.textInverse, fontWeight: '700', fontSize: 16 }}>
+                Get Started
+              </Text>
+            </Button>
           </View>
 
-          {/* Back to Directory - Always visible */}
+          {/* NW20 Dashboard - Always visible */}
           <Pressable 
             style={styles.backToHome}
             onPress={() => router.push('/')}
           >
-            <Ionicons name="grid-outline" size={18} color={colors.textMuted} />
-            <Text style={styles.backToHomeText}>Browse Directory</Text>
+            <Ionicons name="home-outline" size={18} color={colors.primary} />
+            <Text style={[styles.backToHomeText, { color: colors.primary }]}>TheNetwork20 Dashboard</Text>
           </Pressable>
 
           <View style={{ height: 50 }} />

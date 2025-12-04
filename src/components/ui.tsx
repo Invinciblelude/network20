@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
 import {
   View,
   Text,
@@ -9,9 +9,223 @@ import {
   TextStyle,
   TextInputProps,
   ActivityIndicator,
+  Animated,
+  Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { colors, spacing, radius, typography } from '../lib/theme';
+
+// ===================
+// TOAST SYSTEM
+// ===================
+type ToastType = 'success' | 'error' | 'info';
+
+interface ToastState {
+  message: string;
+  type: ToastType;
+  visible: boolean;
+}
+
+interface ToastContextType {
+  showToast: (message: string, type?: ToastType) => void;
+}
+
+const ToastContext = createContext<ToastContextType | null>(null);
+
+export function useToast() {
+  const context = useContext(ToastContext);
+  if (!context) {
+    // Return a no-op if not wrapped in provider (graceful fallback)
+    return { showToast: () => {} };
+  }
+  return context;
+}
+
+export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const [toast, setToast] = useState<ToastState>({ message: '', type: 'info', visible: false });
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const timeoutRef = useRef<NodeJS.Timeout>();
+
+  const showToast = useCallback((message: string, type: ToastType = 'info') => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    
+    setToast({ message, type, visible: true });
+    Animated.timing(fadeAnim, {
+      toValue: 1,
+      duration: 200,
+      useNativeDriver: true,
+    }).start();
+
+    timeoutRef.current = setTimeout(() => {
+      Animated.timing(fadeAnim, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }).start(() => {
+        setToast(prev => ({ ...prev, visible: false }));
+      });
+    }, 2500);
+  }, [fadeAnim]);
+
+  const toastColors = {
+    success: colors.success,
+    error: colors.error,
+    info: colors.accent,
+  };
+
+  return (
+    <ToastContext.Provider value={{ showToast }}>
+      {children}
+      {toast.visible && (
+        <Animated.View
+          style={[
+            toastStyles.container,
+            { opacity: fadeAnim, borderLeftColor: toastColors[toast.type] },
+          ]}
+        >
+          <Text style={toastStyles.text}>{toast.message}</Text>
+        </Animated.View>
+      )}
+    </ToastContext.Provider>
+  );
+}
+
+const toastStyles = StyleSheet.create({
+  container: {
+    position: 'absolute',
+    bottom: 100,
+    left: 20,
+    right: 20,
+    backgroundColor: colors.bgElevated,
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.lg,
+    borderRadius: radius.md,
+    borderLeftWidth: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
+    zIndex: 9999,
+  },
+  text: {
+    color: colors.textPrimary,
+    fontSize: typography.sizes.md,
+    fontWeight: '500',
+  },
+});
+
+// ===================
+// CONFIRM MODAL
+// ===================
+interface ConfirmModalProps {
+  visible: boolean;
+  title: string;
+  message: string;
+  confirmText?: string;
+  cancelText?: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  destructive?: boolean;
+}
+
+export function ConfirmModal({
+  visible,
+  title,
+  message,
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
+  onConfirm,
+  onCancel,
+  destructive = false,
+}: ConfirmModalProps) {
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
+      <Pressable style={confirmStyles.overlay} onPress={onCancel}>
+        <Pressable style={confirmStyles.modal} onPress={e => e.stopPropagation()}>
+          <Text style={confirmStyles.title}>{title}</Text>
+          <Text style={confirmStyles.message}>{message}</Text>
+          <View style={confirmStyles.buttons}>
+            <Pressable style={confirmStyles.cancelButton} onPress={onCancel}>
+              <Text style={confirmStyles.cancelText}>{cancelText}</Text>
+            </Pressable>
+            <Pressable
+              style={[confirmStyles.confirmButton, destructive && confirmStyles.destructiveButton]}
+              onPress={onConfirm}
+            >
+              <Text style={[confirmStyles.confirmText, destructive && confirmStyles.destructiveText]}>
+                {confirmText}
+              </Text>
+            </Pressable>
+          </View>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
+const confirmStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: spacing.lg,
+  },
+  modal: {
+    backgroundColor: colors.bgCard,
+    borderRadius: radius.lg,
+    padding: spacing.xl,
+    width: '100%',
+    maxWidth: 340,
+  },
+  title: {
+    fontSize: typography.sizes.lg,
+    fontWeight: '700',
+    color: colors.textPrimary,
+    marginBottom: spacing.sm,
+  },
+  message: {
+    fontSize: typography.sizes.md,
+    color: colors.textSecondary,
+    marginBottom: spacing.xl,
+    lineHeight: 22,
+  },
+  buttons: {
+    flexDirection: 'row',
+    gap: spacing.sm,
+  },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: colors.bgElevated,
+    paddingVertical: spacing.md,
+    borderRadius: radius.md,
+    alignItems: 'center',
+  },
+  cancelText: {
+    color: colors.textSecondary,
+    fontWeight: '600',
+    fontSize: typography.sizes.md,
+  },
+  confirmButton: {
+    flex: 1,
+    backgroundColor: colors.primary,
+    paddingVertical: spacing.md,
+    borderRadius: radius.md,
+    alignItems: 'center',
+  },
+  confirmText: {
+    color: colors.textInverse,
+    fontWeight: '600',
+    fontSize: typography.sizes.md,
+  },
+  destructiveButton: {
+    backgroundColor: colors.error,
+  },
+  destructiveText: {
+    color: '#fff',
+  },
+});
 
 // ===================
 // CONTAINER
