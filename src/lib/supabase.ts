@@ -1,21 +1,14 @@
 import 'react-native-url-polyfill/auto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import Constants from 'expo-constants';
 import type { Database, Profile, ProfileInsert, ProfileUpdate, SocialLink } from './database.types';
 
 // Re-export types for convenience
 export type { Profile, ProfileInsert, ProfileUpdate, SocialLink };
 
-// Get Supabase credentials - use process.env for web builds
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || Constants.expoConfig?.extra?.supabaseUrl || '';
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || Constants.expoConfig?.extra?.supabaseAnonKey || '';
-
-// Debug logging (remove in production)
-if (typeof window !== 'undefined') {
-  console.log('Supabase configured:', Boolean(supabaseUrl && supabaseAnonKey));
-  console.log('URL:', supabaseUrl ? 'SET' : 'NOT SET');
-}
+// Supabase credentials (anon key is designed to be public)
+const supabaseUrl = 'https://gaunbvghpechybavxtdp.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdhdW5idmdocGVjaHliYXZ4dGRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ3NzA5NjksImV4cCI6MjA4MDM0Njk2OX0.bTM6RND_a_yLY8JoTteYQ3-S_M810KJ1TipIXclTyFQ';
 
 // Check if Supabase is configured
 export const isSupabaseConfigured = Boolean(supabaseUrl && supabaseAnonKey);
