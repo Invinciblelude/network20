@@ -105,9 +105,9 @@ export default function EditProfileScreen() {
     );
   };
 
-  const handleLogout = async () => {
+  const handleSwitchCard = async () => {
     await setCurrentUserId(null);
-    router.replace('/');
+    router.replace('/my-cards');
   };
 
   if (loading) {
@@ -273,17 +273,17 @@ export default function EditProfileScreen() {
             </View>
           </View>
 
-          {/* Danger Zone */}
+          {/* Actions */}
           <View style={styles.dangerZone}>
-            <Text style={styles.dangerTitle}>Account</Text>
-            <Pressable style={styles.dangerButton} onPress={handleLogout}>
-              <Ionicons name="log-out-outline" size={20} color={colors.warning} />
-              <Text style={styles.dangerButtonText}>Switch Profile</Text>
+            <Text style={styles.dangerTitle}>Manage Card</Text>
+            <Pressable style={styles.dangerButton} onPress={handleSwitchCard}>
+              <Ionicons name="swap-horizontal-outline" size={20} color={colors.accent} />
+              <Text style={[styles.dangerButtonText, { color: colors.accent }]}>Switch to Another Card</Text>
             </Pressable>
             <Pressable style={styles.dangerButton} onPress={handleDelete}>
               <Ionicons name="trash-outline" size={20} color={colors.error} />
               <Text style={[styles.dangerButtonText, { color: colors.error }]}>
-                Delete Profile
+                Delete This Card
               </Text>
             </Pressable>
           </View>

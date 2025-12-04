@@ -197,19 +197,16 @@ export async function getCurrentUserProfile(): Promise<Profile | null> {
 }
 
 /**
- * Create a new profile
+ * Create a new profile (no auth required)
  */
 export async function createProfile(profileData: Omit<ProfileInsert, 'id' | 'user_id'>): Promise<Profile | null> {
   if (!supabase) return null;
-  
-  const user = await getCurrentAuthUser();
-  if (!user) throw new Error('Must be logged in to create a profile');
   
   const { data, error } = await supabase
     .from('profiles')
     .insert({
       ...profileData,
-      user_id: user.id,
+      user_id: null, // Anonymous profile
     })
     .select()
     .single();

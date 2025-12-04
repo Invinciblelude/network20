@@ -79,7 +79,7 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View>
             <Text style={styles.logo}>
-              W2<Text style={styles.logoAccent}>Card</Text>
+              NW20<Text style={styles.logoAccent}>Card</Text>
             </Text>
             <Text style={styles.tagline}>Your Work Identity</Text>
           </View>
@@ -172,16 +172,16 @@ export default function HomeScreen() {
             <View style={styles.emptyState}>
               <Ionicons name="card-outline" size={64} color={colors.textMuted} />
               <Text style={styles.emptyTitle}>
-                {searchQuery ? 'No cards found' : 'Welcome to W2 Card'}
+                {searchQuery ? 'No cards found' : 'Welcome to NW20 Card'}
               </Text>
               <Text style={styles.emptySubtitle}>
                 {searchQuery ? (
                   'Try a different search term'
                 ) : (
-                  'Create your W2 Card to get started!\n\n' +
+                  'Create your NW20 Card to get started!\n\n' +
                   '• Showcase your skills and abilities\n' +
-                  '• Set your availability and rates\n' +
-                  '• Share your card with anyone\n' +
+                  '• Get a QR code to share instantly\n' +
+                  '• Be searchable in the directory\n' +
                   '• Get discovered by people who need you'
                 )}
               </Text>
@@ -191,7 +191,7 @@ export default function HomeScreen() {
                   style={{ marginTop: spacing.lg }}
                   size="lg"
                 >
-                  Create Your W2 Card
+                  Create Your NW20 Card
                 </Button>
               )}
             </View>
