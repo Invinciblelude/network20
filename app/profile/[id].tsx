@@ -385,13 +385,18 @@ export default function ProfileDetailScreen() {
             </View>
           )}
 
-          {/* Create Your Own Card CTA */}
-          {!isOwnProfile && (
-            <View style={styles.createOwnCard}>
-              <Text style={styles.createOwnCardTitle}>Want your own NW20 Card?</Text>
-              <Text style={styles.createOwnCardSubtitle}>
-                Create a free digital work card in 60 seconds
-              </Text>
+          {/* Create Your Own Card CTA - Always show for visitors */}
+          <View style={styles.createOwnCard}>
+            <Text style={styles.createOwnCardTitle}>
+              {isOwnProfile ? 'Share your NW20 Card!' : 'Want your own NW20 Card?'}
+            </Text>
+            <Text style={styles.createOwnCardSubtitle}>
+              {isOwnProfile 
+                ? 'Share the QR code or link above to connect with others'
+                : 'Create a free digital work card in 60 seconds'
+              }
+            </Text>
+            {!isOwnProfile && (
               <Button
                 onPress={() => router.push('/create')}
                 fullWidth
@@ -403,10 +408,10 @@ export default function ProfileDetailScreen() {
                   Create My NW20 Card
                 </Text>
               </Button>
-            </View>
-          )}
+            )}
+          </View>
 
-          {/* Back to Directory */}
+          {/* Back to Directory - Always visible */}
           <Pressable 
             style={styles.backToHome}
             onPress={() => router.push('/')}
