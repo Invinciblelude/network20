@@ -279,6 +279,15 @@ export default function EditProfileScreen() {
             </Pressable>
           </View>
 
+          {/* Back to Directory */}
+          <Pressable 
+            style={styles.backToHome}
+            onPress={() => router.push('/')}
+          >
+            <Ionicons name="grid-outline" size={18} color={colors.textMuted} />
+            <Text style={styles.backToHomeText}>Back to Directory</Text>
+          </Pressable>
+
           <View style={{ height: 50 }} />
         </ScrollView>
       </SafeAreaView>
@@ -425,6 +434,19 @@ const styles = StyleSheet.create({
   dangerButtonText: {
     fontSize: typography.sizes.md,
     color: colors.warning,
+  },
+  backToHome: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.xl,
+    paddingVertical: spacing.md,
+  },
+  backToHomeText: {
+    fontSize: typography.sizes.md,
+    color: colors.textMuted,
+    fontWeight: '500',
   },
 });
 

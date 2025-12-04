@@ -385,6 +385,36 @@ export default function ProfileDetailScreen() {
             </View>
           )}
 
+          {/* Create Your Own Card CTA */}
+          {!isOwnProfile && (
+            <View style={styles.createOwnCard}>
+              <Text style={styles.createOwnCardTitle}>Want your own NW20 Card?</Text>
+              <Text style={styles.createOwnCardSubtitle}>
+                Create a free digital work card in 60 seconds
+              </Text>
+              <Button
+                onPress={() => router.push('/create')}
+                fullWidth
+                size="lg"
+                style={{ marginTop: spacing.md }}
+              >
+                <Ionicons name="add-circle" size={20} color={colors.textInverse} style={{ marginRight: 8 }} />
+                <Text style={{ color: colors.textInverse, fontWeight: '700', fontSize: 16 }}>
+                  Create My NW20 Card
+                </Text>
+              </Button>
+            </View>
+          )}
+
+          {/* Back to Directory */}
+          <Pressable 
+            style={styles.backToHome}
+            onPress={() => router.push('/')}
+          >
+            <Ionicons name="grid-outline" size={18} color={colors.textMuted} />
+            <Text style={styles.backToHomeText}>Browse Directory</Text>
+          </Pressable>
+
           <View style={{ height: 50 }} />
         </ScrollView>
       </SafeAreaView>
@@ -642,6 +672,19 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     fontWeight: '600',
   },
+  backToHome: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+    marginTop: spacing.xl,
+    paddingVertical: spacing.md,
+  },
+  backToHomeText: {
+    fontSize: typography.sizes.md,
+    color: colors.textMuted,
+    fontWeight: '500',
+  },
   editSection: {
     marginTop: spacing.xl,
     paddingTop: spacing.lg,
@@ -653,6 +696,27 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.sm,
     color: colors.textMuted,
     marginBottom: spacing.md,
+  },
+  createOwnCard: {
+    marginTop: spacing.xl,
+    padding: spacing.lg,
+    backgroundColor: colors.bgCard,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: colors.primary,
+    alignItems: 'center',
+  },
+  createOwnCardTitle: {
+    fontSize: typography.sizes.lg,
+    fontWeight: '700',
+    color: colors.textPrimary,
+    textAlign: 'center',
+  },
+  createOwnCardSubtitle: {
+    fontSize: typography.sizes.sm,
+    color: colors.textMuted,
+    textAlign: 'center',
+    marginTop: spacing.xs,
   },
 });
 
