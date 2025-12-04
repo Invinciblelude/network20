@@ -33,6 +33,7 @@ export default function ProfileDetailScreen() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -55,6 +56,24 @@ export default function ProfileDetailScreen() {
       return `${window.location.origin}/profile/${profile.id}`;
     }
     return `https://thenetwork20.com/profile/${profile.id}`;
+  };
+
+  const copyToClipboard = async () => {
+    const url = getProfileUrl();
+    if (Platform.OS === 'web' && typeof navigator !== 'undefined') {
+      try {
+        await navigator.clipboard.writeText(url);
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        console.error('Failed to copy:', err);
+      }
+    }
+  };
+
+  const openProfileUrl = () => {
+    const url = getProfileUrl();
+    Linking.openURL(url);
   };
 
   const handleShare = async () => {
@@ -300,7 +319,7 @@ export default function ProfileDetailScreen() {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Share This Card</Text>
             <View style={styles.qrContainer}>
-              <View style={styles.qrCard}>
+              <Pressable style={styles.qrCard} onPress={copyToClipboard}>
                 <QRCode 
                   value={getProfileUrl()} 
                   size={180}
@@ -308,9 +327,29 @@ export default function ProfileDetailScreen() {
                   foregroundColor={colors.textPrimary}
                 />
                 <Text style={styles.qrHint}>
-                  Scan to view this NW20 Card
+                  {copied ? '✓ Link copied!' : 'Tap to copy link'}
                 </Text>
+              </Pressable>
+              
+              {/* URL display and copy button */}
+              <View style={styles.urlContainer}>
+                <Text style={styles.urlText} numberOfLines={1}>
+                  {getProfileUrl()}
+                </Text>
+                <Pressable style={styles.copyButton} onPress={copyToClipboard}>
+                  <Ionicons 
+                    name={copied ? "checkmark" : "copy-outline"} 
+                    size={20} 
+                    color={copied ? colors.success : colors.primary} 
+                  />
+                </Pressable>
               </View>
+              
+              {/* Open in new tab button */}
+              <Pressable style={styles.openLinkButton} onPress={openProfileUrl}>
+                <Ionicons name="open-outline" size={18} color={colors.textPrimary} />
+                <Text style={styles.openLinkText}>Open Link</Text>
+              </Pressable>
             </View>
           </View>
 
@@ -567,6 +606,41 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     marginTop: spacing.md,
     textAlign: 'center',
+  },
+  urlContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.bgInput,
+    borderRadius: radius.md,
+    marginTop: spacing.md,
+    paddingLeft: spacing.md,
+    maxWidth: '100%',
+    overflow: 'hidden',
+  },
+  urlText: {
+    flex: 1,
+    fontSize: typography.sizes.xs,
+    color: colors.textMuted,
+    paddingVertical: spacing.sm,
+  },
+  copyButton: {
+    padding: spacing.md,
+    backgroundColor: colors.bgCard,
+    borderLeftWidth: 1,
+    borderLeftColor: colors.bgElevated,
+  },
+  openLinkButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginTop: spacing.sm,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+  },
+  openLinkText: {
+    fontSize: typography.sizes.sm,
+    color: colors.textPrimary,
+    fontWeight: '600',
   },
   editSection: {
     marginTop: spacing.xl,
