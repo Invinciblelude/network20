@@ -15,7 +15,7 @@ import { Link, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius, typography } from '../src/lib/theme';
 import { Avatar, Card, Chip, Badge, Button } from '../src/components/ui';
-import { getProfiles, getCurrentUser, isUsingSupabase, type Profile } from '../src/lib/store';
+import { getProfiles, getCurrentUser, type Profile } from '../src/lib/store';
 
 const { width } = Dimensions.get('window');
 
@@ -79,9 +79,9 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View>
             <Text style={styles.logo}>
-              Network<Text style={styles.logoAccent}>20</Text>
+              W2<Text style={styles.logoAccent}>Card</Text>
             </Text>
-            <Text style={styles.tagline}>Connect. Work. Thrive.</Text>
+            <Text style={styles.tagline}>Your Work Identity</Text>
           </View>
           
           <View style={styles.headerActions}>
@@ -91,14 +91,6 @@ export default function HomeScreen() {
                 style={styles.cardsButton}
               >
                 <Ionicons name="card-outline" size={20} color={colors.textPrimary} />
-              </Pressable>
-            )}
-            {!currentUser && isUsingSupabase() && (
-              <Pressable
-                onPress={() => router.push('/auth/login')}
-                style={styles.loginButton}
-              >
-                <Text style={styles.loginButtonText}>Sign In</Text>
               </Pressable>
             )}
             <Pressable
@@ -178,19 +170,19 @@ export default function HomeScreen() {
         >
           {filteredProfiles.length === 0 ? (
             <View style={styles.emptyState}>
-              <Ionicons name="people-outline" size={64} color={colors.textMuted} />
+              <Ionicons name="card-outline" size={64} color={colors.textMuted} />
               <Text style={styles.emptyTitle}>
-                {searchQuery ? 'No profiles found' : 'Welcome to Network 20'}
+                {searchQuery ? 'No cards found' : 'Welcome to W2 Card'}
               </Text>
               <Text style={styles.emptySubtitle}>
                 {searchQuery ? (
                   'Try a different search term'
                 ) : (
-                  'Create your network card to get started!\n\n' +
+                  'Create your W2 Card to get started!\n\n' +
                   '• Showcase your skills and abilities\n' +
-                  '• Set your availability and pay preferences\n' +
-                  '• Connect with people looking for your expertise\n' +
-                  '• Build your professional network'
+                  '• Set your availability and rates\n' +
+                  '• Share your card with anyone\n' +
+                  '• Get discovered by people who need you'
                 )}
               </Text>
               {!currentUser && (
@@ -199,7 +191,7 @@ export default function HomeScreen() {
                   style={{ marginTop: spacing.lg }}
                   size="lg"
                 >
-                  Create Your Network Card
+                  Create Your W2 Card
                 </Button>
               )}
             </View>
@@ -363,19 +355,6 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bgElevated,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  loginButton: {
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: radius.md,
-    backgroundColor: colors.bgCard,
-    borderWidth: 1,
-    borderColor: colors.primary,
-  },
-  loginButtonText: {
-    color: colors.primary,
-    fontSize: typography.sizes.sm,
-    fontWeight: '600',
   },
   profileButton: {
     padding: 2,

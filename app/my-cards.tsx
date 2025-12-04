@@ -91,7 +91,7 @@ export default function MyCardsScreen() {
           <Pressable onPress={() => router.back()} style={styles.backButton}>
             <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
           </Pressable>
-          <Text style={styles.headerTitle}>My Network Cards</Text>
+          <Text style={styles.headerTitle}>My W2 Cards</Text>
           <Pressable
             onPress={() => router.push('/create')}
             style={styles.addButton}
@@ -110,13 +110,13 @@ export default function MyCardsScreen() {
               <Ionicons name="card-outline" size={64} color={colors.textMuted} />
               <Text style={styles.emptyTitle}>No cards yet</Text>
               <Text style={styles.emptySubtitle}>
-                Create your first network card to get started!
+                Create your first W2 Card to get started!
               </Text>
               <Button
                 onPress={() => router.push('/create')}
                 style={{ marginTop: spacing.lg }}
               >
-                Create Your First Card
+                Create Your First W2 Card
               </Button>
             </View>
           ) : (
@@ -222,7 +222,7 @@ export default function MyCardsScreen() {
               >
                 <Ionicons name="add-circle-outline" size={20} color={colors.textPrimary} />
                 <Text style={{ marginLeft: spacing.xs, color: colors.textPrimary, fontWeight: '700' }}>
-                  Create Another Card
+                  Create Another W2 Card
                 </Text>
               </Button>
 

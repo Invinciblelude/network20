@@ -158,14 +158,14 @@ export default function CreateProfileScreen() {
             {/* Step 1: Basic Info */}
             {step === 1 && (
               <View style={styles.stepContainer}>
-                <Text style={styles.stepTitle}>Let's create your card</Text>
+                <Text style={styles.stepTitle}>Create your W2 Card</Text>
                 <Text style={styles.stepSubtitle}>
                   How should people find and recognize you?
                 </Text>
                 <View style={styles.instructionBox}>
                   <Ionicons name="information-circle-outline" size={20} color={colors.accent} />
                   <Text style={styles.instructionText}>
-                    Use your real name, business name, or any name you're comfortable with. This is your public identity on Network 20.
+                    Use your real name, business name, or any name you're comfortable with. This is your public W2 Card identity.
                   </Text>
                 </View>
 
@@ -491,7 +491,7 @@ export default function CreateProfileScreen() {
                 loading={isSubmitting}
                 style={{ flex: 2 }}
               >
-                Create My Card
+                Create My W2 Card
               </Button>
             )}
           </View>
