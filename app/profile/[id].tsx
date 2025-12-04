@@ -62,7 +62,7 @@ export default function ProfileDetailScreen() {
     try {
       const url = getProfileUrl();
       await Share.share({
-        message: `Check out ${profile.display_name} on Network20!\n\n${profile.tagline || ''}\nSkills: ${profile.skills.join(', ')}\n\nView profile: ${url}`,
+        message: `Check out ${profile.display_name}'s NW20 Card!\n\n${profile.tagline || ''}\nSkills: ${profile.skills.join(', ')}\n\nView card: ${url}`,
         url: url,
       });
     } catch (error) {
@@ -180,40 +180,42 @@ export default function ProfileDetailScreen() {
             )}
           </View>
 
-          {/* Quick Stats */}
-          <View style={styles.statsCard}>
-            {profile.hours_available && (
-              <View style={styles.statBox}>
-                <View style={styles.statIcon}>
-                  <Ionicons name="time-outline" size={20} color={colors.accent} />
+          {/* Quick Stats - only show if there's data */}
+          {(profile.hours_available || profile.pay_preference || profile.pay_rate) && (
+            <View style={styles.statsCard}>
+              {profile.hours_available && (
+                <View style={styles.statBox}>
+                  <View style={styles.statIcon}>
+                    <Ionicons name="time-outline" size={20} color={colors.accent} />
+                  </View>
+                  <Text style={styles.statValue}>
+                    {profile.hours_available}
+                  </Text>
+                  <Text style={styles.statLabel}>hrs/{profile.hours_frequency}</Text>
                 </View>
-                <Text style={styles.statValue}>
-                  {profile.hours_available}
-                </Text>
-                <Text style={styles.statLabel}>hrs/{profile.hours_frequency}</Text>
-              </View>
-            )}
-            {profile.pay_preference && (
-              <View style={styles.statBox}>
-                <View style={styles.statIcon}>
-                  <Ionicons name="wallet-outline" size={20} color={colors.accent} />
+              )}
+              {profile.pay_preference && (
+                <View style={styles.statBox}>
+                  <View style={styles.statIcon}>
+                    <Ionicons name="wallet-outline" size={20} color={colors.accent} />
+                  </View>
+                  <Text style={styles.statValue}>
+                    {profile.pay_preference.charAt(0).toUpperCase() + profile.pay_preference.slice(1)}
+                  </Text>
+                  <Text style={styles.statLabel}>preferred</Text>
                 </View>
-                <Text style={styles.statValue}>
-                  {profile.pay_preference.charAt(0).toUpperCase() + profile.pay_preference.slice(1)}
-                </Text>
-                <Text style={styles.statLabel}>preferred</Text>
-              </View>
-            )}
-            {profile.pay_rate && (
-              <View style={styles.statBox}>
-                <View style={styles.statIcon}>
-                  <Ionicons name="cash-outline" size={20} color={colors.accent} />
+              )}
+              {profile.pay_rate && (
+                <View style={styles.statBox}>
+                  <View style={styles.statIcon}>
+                    <Ionicons name="cash-outline" size={20} color={colors.accent} />
+                  </View>
+                  <Text style={styles.statValue}>{profile.pay_rate}</Text>
+                  <Text style={styles.statLabel}>rate</Text>
                 </View>
-                <Text style={styles.statValue}>{profile.pay_rate}</Text>
-                <Text style={styles.statLabel}>rate</Text>
-              </View>
-            )}
-          </View>
+              )}
+            </View>
+          )}
 
           {/* Bio */}
           {profile.bio && (
@@ -235,40 +237,7 @@ export default function ProfileDetailScreen() {
             </View>
           )}
 
-          {/* Resume */}
-          {profile.resume_url && (
-            <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Resume</Text>
-              <Pressable
-                style={styles.resumeButton}
-                onPress={() => Linking.openURL(profile.resume_url!)}
-              >
-                <Ionicons name="document-text-outline" size={24} color={colors.primary} />
-                <Text style={styles.resumeButtonText}>View Resume</Text>
-                <Ionicons name="open-outline" size={20} color={colors.textMuted} />
-              </Pressable>
-            </View>
-          )}
-
-          {/* QR Code */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Share This Card</Text>
-            <View style={styles.qrContainer}>
-              <View style={styles.qrCard}>
-                <QRCode 
-                  value={getProfileUrl()} 
-                  size={180}
-                  backgroundColor={colors.bgCard}
-                  foregroundColor={colors.textPrimary}
-                />
-                <Text style={styles.qrHint}>
-                  Scan to view this Network 20 card
-                </Text>
-              </View>
-            </View>
-          </View>
-
-          {/* Contact */}
+          {/* Contact - Move up for prominence */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Get in Touch</Text>
             <View style={styles.contactButtons}>
@@ -310,6 +279,39 @@ export default function ProfileDetailScreen() {
                 ))}
               </View>
             )}
+          </View>
+
+          {/* Resume */}
+          {profile.resume_url && (
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Resume</Text>
+              <Pressable
+                style={styles.resumeButton}
+                onPress={() => Linking.openURL(profile.resume_url!)}
+              >
+                <Ionicons name="document-text-outline" size={24} color={colors.primary} />
+                <Text style={styles.resumeButtonText}>View Resume</Text>
+                <Ionicons name="open-outline" size={20} color={colors.textMuted} />
+              </Pressable>
+            </View>
+          )}
+
+          {/* QR Code */}
+          <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Share This Card</Text>
+            <View style={styles.qrContainer}>
+              <View style={styles.qrCard}>
+                <QRCode 
+                  value={getProfileUrl()} 
+                  size={180}
+                  backgroundColor={colors.bgCard}
+                  foregroundColor={colors.textPrimary}
+                />
+                <Text style={styles.qrHint}>
+                  Scan to view this NW20 Card
+                </Text>
+              </View>
+            </View>
           </View>
 
           {/* CTA */}
