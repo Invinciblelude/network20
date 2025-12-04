@@ -74,6 +74,8 @@ export async function createProfile(data: Omit<ProfileInsert, 'id' | 'user_id'>)
   if (useSupabase) {
     const profile = await SupabaseAPI.createProfile(data);
     if (!profile) throw new Error('Failed to create profile');
+    // Save the profile ID locally so we know it's "ours"
+    await AsyncStorage.setItem(CURRENT_USER_KEY, profile.id);
     return profile;
   }
   
@@ -194,17 +196,9 @@ export async function getAvailableProfiles(): Promise<Profile[]> {
 // ============================================
 
 /**
- * Get current user ID (local storage only - Supabase uses auth)
+ * Get current user ID (always from local storage since we don't use auth)
  */
 export async function getCurrentUserId(): Promise<string | null> {
-  if (useSupabase) {
-    const user = await SupabaseAPI.getCurrentAuthUser();
-    if (!user) return null;
-    
-    const profile = await SupabaseAPI.getCurrentUserProfile();
-    return profile?.id || null;
-  }
-  
   try {
     return await AsyncStorage.getItem(CURRENT_USER_KEY);
   } catch {
@@ -213,14 +207,9 @@ export async function getCurrentUserId(): Promise<string | null> {
 }
 
 /**
- * Set current user ID (local storage only)
+ * Set current user ID (always local storage)
  */
 export async function setCurrentUserId(id: string | null): Promise<void> {
-  if (useSupabase) {
-    // For Supabase, this is handled by auth - no-op
-    return;
-  }
-  
   if (id) {
     await AsyncStorage.setItem(CURRENT_USER_KEY, id);
   } else {
@@ -232,10 +221,6 @@ export async function setCurrentUserId(id: string | null): Promise<void> {
  * Get current user's profile
  */
 export async function getCurrentUser(): Promise<Profile | null> {
-  if (useSupabase) {
-    return SupabaseAPI.getCurrentUserProfile();
-  }
-  
   const id = await getCurrentUserId();
   if (!id) return null;
   return getProfile(id);
