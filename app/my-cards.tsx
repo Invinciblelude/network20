@@ -5,7 +5,6 @@ import {
   ScrollView,
   StyleSheet,
   Pressable,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -48,25 +47,19 @@ export default function MyCardsScreen() {
   }
 
   async function handleDelete(id: string, name: string) {
-    Alert.alert(
-      'Delete Card',
-      `Are you sure you want to delete "${name}"? This cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            await deleteProfile(id);
-            if (currentUserId === id) {
-              await setCurrentUserId(null);
-              setCurrentUserIdState(null);
-            }
-            await loadProfiles();
-          },
-        },
-      ]
-    );
+    // Use confirm on web, Alert on native
+    const confirmed = typeof window !== 'undefined' 
+      ? window.confirm(`Delete "${name}"? This cannot be undone.`)
+      : true;
+    
+    if (confirmed) {
+      await deleteProfile(id);
+      if (currentUserId === id) {
+        await setCurrentUserId(null);
+        setCurrentUserIdState(null);
+      }
+      await loadProfiles();
+    }
   }
 
   if (loading) {

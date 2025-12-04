@@ -6,7 +6,6 @@ import {
   StyleSheet,
   Pressable,
   TextInput,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -85,24 +84,16 @@ export default function EditProfileScreen() {
     }
   };
 
-  const handleDelete = () => {
-    Alert.alert(
-      'Delete Profile',
-      'Are you sure you want to delete your profile? This cannot be undone.',
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Delete',
-          style: 'destructive',
-          onPress: async () => {
-            if (!profile) return;
-            await deleteProfile(profile.id);
-            await setCurrentUserId(null);
-            router.replace('/');
-          },
-        },
-      ]
-    );
+  const handleDelete = async () => {
+    const confirmed = typeof window !== 'undefined'
+      ? window.confirm('Delete this card? This cannot be undone.')
+      : true;
+    
+    if (confirmed && profile) {
+      await deleteProfile(profile.id);
+      await setCurrentUserId(null);
+      router.replace('/');
+    }
   };
 
   const handleSwitchCard = async () => {
