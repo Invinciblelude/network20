@@ -86,6 +86,11 @@ export function Header({ showCreate = true }: HeaderProps) {
                   <Text style={styles.mobileNavLinkText}>For Employers</Text>
                 </Pressable>
 
+                <Pressable style={styles.mobileNavLink} onPress={() => navigateTo('/promotions')}>
+                  <Ionicons name="megaphone-outline" size={22} color={colors.textSecondary} />
+                  <Text style={styles.mobileNavLinkText}>Promotions</Text>
+                </Pressable>
+
                 <View style={styles.mobileMenuDivider} />
 
                 <Pressable style={styles.mobileNavLink} onPress={() => navigateTo('/my-cards')}>

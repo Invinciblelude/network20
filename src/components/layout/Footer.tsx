@@ -31,6 +31,10 @@ export function Footer() {
         <Pressable onPress={() => router.push('/hire')}>
           <Text style={styles.footerLink}>For Employers</Text>
         </Pressable>
+        <Text style={styles.footerDot}>•</Text>
+        <Pressable onPress={() => router.push('/promotions')}>
+          <Text style={styles.footerLink}>Promotions</Text>
+        </Pressable>
       </View>
     </View>
   );
