@@ -18,6 +18,7 @@ import { Header } from '../../src/components/layout/Header';
 import { Footer } from '../../src/components/layout/Footer';
 import { QRCode } from '../../src/components/QRCode';
 import { getProfile, getCurrentUserId, type Profile } from '../../src/lib/store';
+import { useAuth } from '../../src/context/AuthContext';
 import { Platform } from 'react-native';
 
 const SOCIAL_ICONS: Record<string, string> = {
@@ -32,8 +33,10 @@ const SOCIAL_ICONS: Record<string, string> = {
 export default function ProfileDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
+  const { user: authUser } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
+  const [isGuestOwner, setIsGuestOwner] = useState(false); // Owns via local storage but not signed in
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
 
@@ -45,11 +48,19 @@ export default function ProfileDetailScreen() {
         getCurrentUserId(),
       ]);
       setProfile(p);
-      setIsOwnProfile(currentUserId === id);
+      
+      // Check if user owns this profile
+      const isOwner = currentUserId === id;
+      setIsOwnProfile(isOwner);
+      
+      // Check if this is a guest-owned profile (local storage but not signed in)
+      // Guest profiles have user_id = null
+      setIsGuestOwner(isOwner && p?.user_id === null && !authUser);
+      
       setLoading(false);
     }
     load();
-  }, [id]);
+  }, [id, authUser]);
 
   const getProfileUrl = () => {
     if (!profile) return '';
@@ -359,10 +370,12 @@ export default function ProfileDetailScreen() {
             </Button>
           )}
 
-          {/* Edit button for own profile */}
+          {/* Edit section for own profile */}
           {isOwnProfile && (
             <View style={styles.editSection}>
               <Text style={styles.editHint}>This is your NW20 Card</Text>
+              
+              {/* Edit Button */}
               <Button
                 onPress={() => router.push(`/profile/edit/${profile.id}`)}
                 fullWidth
@@ -374,6 +387,44 @@ export default function ProfileDetailScreen() {
                   Edit My Card
                 </Text>
               </Button>
+
+              {/* Sign up prompt for guest users */}
+              {isGuestOwner && (
+                <View style={styles.claimCard}>
+                  <View style={styles.claimCardIcon}>
+                    <Ionicons name="shield-checkmark" size={24} color={colors.primary} />
+                  </View>
+                  <Text style={styles.claimCardTitle}>Claim Your Card</Text>
+                  <Text style={styles.claimCardDesc}>
+                    Sign up to keep your card safe, edit it from any device, and unlock more features.
+                  </Text>
+                  <Button
+                    onPress={() => router.push('/auth/signup')}
+                    fullWidth
+                    size="lg"
+                    style={{ marginTop: spacing.md }}
+                  >
+                    <Ionicons name="person-add" size={20} color={colors.textInverse} style={{ marginRight: 8 }} />
+                    <Text style={{ color: colors.textInverse, fontWeight: '700', fontSize: 16 }}>
+                      Sign Up to Claim
+                    </Text>
+                  </Button>
+                  <Text style={styles.claimCardNote}>
+                    Already have an account?{' '}
+                    <Text style={styles.claimCardLink} onPress={() => router.push('/auth/login')}>
+                      Sign in
+                    </Text>
+                  </Text>
+                </View>
+              )}
+
+              {/* Show signed-in status */}
+              {authUser && profile.user_id === authUser.id && (
+                <View style={styles.ownedBadge}>
+                  <Ionicons name="checkmark-circle" size={18} color={colors.success} />
+                  <Text style={styles.ownedBadgeText}>Owned by you</Text>
+                </View>
+              )}
             </View>
           )}
 
@@ -670,5 +721,63 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     textAlign: 'center',
     marginTop: spacing.xs,
+  },
+
+  // Claim Card (for guest users)
+  claimCard: {
+    marginTop: spacing.xl,
+    padding: spacing.lg,
+    backgroundColor: `${colors.primary}10`,
+    borderRadius: radius.lg,
+    borderWidth: 1,
+    borderColor: `${colors.primary}30`,
+    alignItems: 'center',
+  },
+  claimCardIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: `${colors.primary}20`,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+  },
+  claimCardTitle: {
+    fontSize: typography.sizes.lg,
+    fontWeight: '700',
+    color: colors.textPrimary,
+  },
+  claimCardDesc: {
+    fontSize: typography.sizes.sm,
+    color: colors.textSecondary,
+    textAlign: 'center',
+    marginTop: spacing.xs,
+    lineHeight: 20,
+  },
+  claimCardNote: {
+    fontSize: typography.sizes.sm,
+    color: colors.textMuted,
+    marginTop: spacing.md,
+  },
+  claimCardLink: {
+    color: colors.primary,
+    fontWeight: '600',
+  },
+
+  // Owned badge
+  ownedBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginTop: spacing.md,
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    backgroundColor: `${colors.success}15`,
+    borderRadius: radius.full,
+  },
+  ownedBadgeText: {
+    fontSize: typography.sizes.xs,
+    color: colors.success,
+    fontWeight: '600',
   },
 });
