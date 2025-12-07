@@ -196,9 +196,22 @@ export async function getAvailableProfiles(): Promise<Profile[]> {
 // ============================================
 
 /**
- * Get current user ID (always from local storage since we don't use auth)
+ * Get current user ID - checks auth first, then falls back to local storage
  */
 export async function getCurrentUserId(): Promise<string | null> {
+  // First check if user is authenticated
+  if (useSupabase) {
+    const authUser = await SupabaseAPI.getCurrentAuthUser();
+    if (authUser) {
+      // User is logged in - find their profile by user_id
+      const profile = await SupabaseAPI.getCurrentUserProfile();
+      if (profile) {
+        return profile.id;
+      }
+    }
+  }
+  
+  // Fall back to local storage for anonymous users
   try {
     return await AsyncStorage.getItem(CURRENT_USER_KEY);
   } catch {
@@ -207,7 +220,7 @@ export async function getCurrentUserId(): Promise<string | null> {
 }
 
 /**
- * Set current user ID (always local storage)
+ * Set current user ID (for anonymous users - local storage)
  */
 export async function setCurrentUserId(id: string | null): Promise<void> {
   if (id) {
@@ -218,12 +231,30 @@ export async function setCurrentUserId(id: string | null): Promise<void> {
 }
 
 /**
- * Get current user's profile
+ * Get current user's profile - checks auth first, then local storage
  */
 export async function getCurrentUser(): Promise<Profile | null> {
-  const id = await getCurrentUserId();
+  // First check if user is authenticated
+  if (useSupabase) {
+    const authUser = await SupabaseAPI.getCurrentAuthUser();
+    if (authUser) {
+      // User is logged in - get their profile
+      return SupabaseAPI.getCurrentUserProfile();
+    }
+  }
+  
+  // Fall back to local storage for anonymous users
+  const id = await AsyncStorage.getItem(CURRENT_USER_KEY);
   if (!id) return null;
   return getProfile(id);
+}
+
+/**
+ * Get profile for authenticated user (by user_id)
+ */
+export async function getAuthenticatedUserProfile(): Promise<Profile | null> {
+  if (!useSupabase) return null;
+  return SupabaseAPI.getCurrentUserProfile();
 }
 
 // ============================================

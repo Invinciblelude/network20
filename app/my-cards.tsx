@@ -11,7 +11,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius, typography } from '../src/lib/theme';
-import { Avatar, Card, Button, Badge } from '../src/components/ui';
+import { Avatar, Card, Button, Badge, ConfirmModal, useToast } from '../src/components/ui';
+import { Header } from '../src/components/layout/Header';
+import { Footer } from '../src/components/layout/Footer';
 import {
   getProfiles,
   getCurrentUserId,
@@ -19,23 +21,37 @@ import {
   deleteProfile,
   type Profile,
 } from '../src/lib/store';
+import { useAuth } from '../src/context/AuthContext';
 
 export default function MyCardsScreen() {
   const router = useRouter();
+  const { showToast } = useToast();
+  const { user: authUser } = useAuth();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [currentUserId, setCurrentUserIdState] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [deleteModal, setDeleteModal] = useState<{ visible: boolean; id: string; name: string }>({
+    visible: false,
+    id: '',
+    name: '',
+  });
 
   useEffect(() => {
     loadProfiles();
-  }, []);
+  }, [authUser]);
 
   async function loadProfiles() {
     const [allProfiles, currentId] = await Promise.all([
       getProfiles(),
       getCurrentUserId(),
     ]);
-    setProfiles(allProfiles);
+    
+    // Filter to only show profiles owned by the authenticated user
+    const myProfiles = authUser 
+      ? allProfiles.filter(p => p.user_id === authUser.id)
+      : [];
+    
+    setProfiles(myProfiles);
     setCurrentUserIdState(currentId);
     setLoading(false);
   }
@@ -43,23 +59,25 @@ export default function MyCardsScreen() {
   async function switchProfile(id: string) {
     await setCurrentUserId(id);
     setCurrentUserIdState(id);
+    showToast('Switched card', 'success');
     router.replace('/');
   }
 
-  async function handleDelete(id: string, name: string) {
-    // Use confirm on web, Alert on native
-    const confirmed = typeof window !== 'undefined' 
-      ? window.confirm(`Delete "${name}"? This cannot be undone.`)
-      : true;
+  function handleDeletePress(id: string, name: string) {
+    setDeleteModal({ visible: true, id, name });
+  }
+
+  async function confirmDelete() {
+    const { id, name } = deleteModal;
+    setDeleteModal({ visible: false, id: '', name: '' });
     
-    if (confirmed) {
-      await deleteProfile(id);
-      if (currentUserId === id) {
-        await setCurrentUserId(null);
-        setCurrentUserIdState(null);
-      }
-      await loadProfiles();
+    await deleteProfile(id);
+    if (currentUserId === id) {
+      await setCurrentUserId(null);
+      setCurrentUserIdState(null);
     }
+    await loadProfiles();
+    showToast(`"${name}" deleted`, 'success');
   }
 
   if (loading) {
@@ -77,28 +95,48 @@ export default function MyCardsScreen() {
         locations={[0, 0.5, 1]}
         style={StyleSheet.absoluteFill}
       />
+      <ConfirmModal
+        visible={deleteModal.visible}
+        title="Delete Card"
+        message={`Delete "${deleteModal.name}"? This cannot be undone.`}
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteModal({ visible: false, id: '', name: '' })}
+        destructive
+      />
 
       <SafeAreaView style={styles.safeArea}>
-        {/* Header */}
-        <View style={styles.header}>
-          <Pressable onPress={() => router.back()} style={styles.backButton}>
-            <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
-          </Pressable>
-          <Text style={styles.headerTitle}>My NW20 Cards</Text>
-          <Pressable
-            onPress={() => router.push('/create')}
-            style={styles.addButton}
-          >
-            <Ionicons name="add" size={24} color={colors.primary} />
-          </Pressable>
-        </View>
+        <Header showCreate={false} />
 
         <ScrollView
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {profiles.length === 0 ? (
+          {/* Page Title */}
+          <View style={styles.pageHeader}>
+            <Text style={styles.pageTitle}>My NW20 Cards</Text>
+            <Text style={styles.pageSubtitle}>
+              Manage your employment cards.
+            </Text>
+          </View>
+
+          {!authUser ? (
+            <View style={styles.emptyState}>
+              <Ionicons name="lock-closed-outline" size={64} color={colors.textMuted} />
+              <Text style={styles.emptyTitle}>Sign in required</Text>
+              <Text style={styles.emptySubtitle}>
+                Sign in to create and manage your NW20 Cards
+              </Text>
+              <Button
+                onPress={() => router.push('/auth/login')}
+                style={{ marginTop: spacing.lg }}
+              >
+                Sign In
+              </Button>
+            </View>
+          ) : profiles.length === 0 ? (
             <View style={styles.emptyState}>
               <Ionicons name="card-outline" size={64} color={colors.textMuted} />
               <Text style={styles.emptyTitle}>No cards yet</Text>
@@ -116,9 +154,6 @@ export default function MyCardsScreen() {
             <>
               <Text style={styles.sectionTitle}>
                 {profiles.length} {profiles.length === 1 ? 'Card' : 'Cards'}
-              </Text>
-              <Text style={styles.sectionSubtitle}>
-                Switch between cards or create a new one
               </Text>
 
               {profiles.map((profile) => (
@@ -172,16 +207,16 @@ export default function MyCardsScreen() {
                         onPress={() => switchProfile(profile.id)}
                       >
                         <Ionicons name="swap-horizontal" size={20} color={colors.primary} />
-                        <Text style={styles.actionButtonText}>Switch to This Card</Text>
+                        <Text style={styles.actionButtonText}>Switch</Text>
                       </Pressable>
                     ) : (
                       <Pressable
                         style={[styles.actionButton, styles.viewButton]}
                         onPress={() => router.push(`/profile/${profile.id}`)}
                       >
-                        <Ionicons name="eye-outline" size={20} color={colors.textPrimary} />
-                        <Text style={[styles.actionButtonText, { color: colors.textPrimary }]}>
-                          View Card
+                        <Ionicons name="eye-outline" size={20} color={colors.textInverse} />
+                        <Text style={[styles.actionButtonText, { color: colors.textInverse }]}>
+                          View
                         </Text>
                       </Pressable>
                     )}
@@ -196,7 +231,7 @@ export default function MyCardsScreen() {
                     </Pressable>
                     <Pressable
                       style={[styles.actionButton, styles.deleteButton]}
-                      onPress={() => handleDelete(profile.id, profile.display_name)}
+                      onPress={() => handleDeletePress(profile.id, profile.display_name)}
                     >
                       <Ionicons name="trash-outline" size={20} color={colors.error} />
                       <Text style={[styles.actionButtonText, { color: colors.error }]}>
@@ -210,18 +245,18 @@ export default function MyCardsScreen() {
               <Button
                 onPress={() => router.push('/create')}
                 variant="secondary"
-                style={{ marginTop: spacing.xl }}
+                style={{ marginTop: spacing.lg }}
                 fullWidth
               >
                 <Ionicons name="add-circle-outline" size={20} color={colors.textPrimary} />
                 <Text style={{ marginLeft: spacing.xs, color: colors.textPrimary, fontWeight: '700' }}>
-                  Create Another NW20 Card
+                  Create Another Card
                 </Text>
               </Button>
-
-              <View style={{ height: 50 }} />
             </>
           )}
+
+          <Footer />
         </ScrollView>
       </SafeAreaView>
     </View>
@@ -244,54 +279,33 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.lg,
     color: colors.textMuted,
   },
-
-  // Header
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.bgElevated,
-  },
-  backButton: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  headerTitle: {
-    fontSize: typography.sizes.lg,
-    fontWeight: '700',
-    color: colors.textPrimary,
-  },
-  addButton: {
-    width: 40,
-    height: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  // Scroll
   scrollView: {
     flex: 1,
   },
   scrollContent: {
     paddingHorizontal: spacing.lg,
-    paddingTop: spacing.lg,
+  },
+
+  // Page Header
+  pageHeader: {
+    paddingVertical: spacing.xl,
+  },
+  pageTitle: {
+    fontSize: typography.sizes.xxl,
+    fontWeight: '700',
+    color: colors.textPrimary,
+  },
+  pageSubtitle: {
+    fontSize: typography.sizes.md,
+    color: colors.textMuted,
+    marginTop: spacing.xs,
   },
 
   // Section
   sectionTitle: {
-    fontSize: typography.sizes.xl,
+    fontSize: typography.sizes.lg,
     fontWeight: '700',
-    color: colors.textPrimary,
-    marginBottom: spacing.xs,
-  },
-  sectionSubtitle: {
-    fontSize: typography.sizes.sm,
-    color: colors.textMuted,
+    color: colors.textSecondary,
     marginBottom: spacing.lg,
   },
 
@@ -390,9 +404,12 @@ const styles = StyleSheet.create({
 
   // Empty State
   emptyState: {
+    backgroundColor: colors.bgCard,
+    borderRadius: radius.lg,
+    padding: spacing.xxl,
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.xxl * 2,
+    borderWidth: 1,
+    borderColor: colors.bgElevated,
   },
   emptyTitle: {
     fontSize: typography.sizes.xl,
@@ -407,4 +424,3 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 });
-

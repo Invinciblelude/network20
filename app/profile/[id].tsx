@@ -14,6 +14,8 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius, typography } from '../../src/lib/theme';
 import { Avatar, Chip, Badge, Button } from '../../src/components/ui';
+import { Header } from '../../src/components/layout/Header';
+import { Footer } from '../../src/components/layout/Footer';
 import { QRCode } from '../../src/components/QRCode';
 import { getProfile, getCurrentUserId, type Profile } from '../../src/lib/store';
 import { Platform } from 'react-native';
@@ -52,7 +54,6 @@ export default function ProfileDetailScreen() {
   const getProfileUrl = () => {
     if (!profile) return '';
     if (Platform.OS === 'web' && typeof window !== 'undefined') {
-      // Use current domain (works for localhost, thenetwork20.com, etc.)
       return `${window.location.origin}/profile/${profile.id}`;
     }
     return `https://thenetwork20.com/profile/${profile.id}`;
@@ -132,12 +133,22 @@ export default function ProfileDetailScreen() {
 
   if (!profile) {
     return (
-      <View style={[styles.container, styles.centered]}>
-        <Ionicons name="person-outline" size={64} color={colors.textMuted} />
-        <Text style={styles.errorTitle}>Profile not found</Text>
-        <Button onPress={() => router.back()} style={{ marginTop: spacing.lg }}>
-          Go Back
-        </Button>
+      <View style={styles.container}>
+        <LinearGradient
+          colors={['#1a0a0f', colors.bg, '#0a1a1f']}
+          locations={[0, 0.5, 1]}
+          style={StyleSheet.absoluteFill}
+        />
+        <SafeAreaView style={styles.safeArea}>
+          <Header />
+          <View style={[styles.container, styles.centered]}>
+            <Ionicons name="person-outline" size={64} color={colors.textMuted} />
+            <Text style={styles.errorTitle}>Profile not found</Text>
+            <Button onPress={() => router.push('/directory')} style={{ marginTop: spacing.lg }}>
+              Browse Directory
+            </Button>
+          </View>
+        </SafeAreaView>
       </View>
     );
   }
@@ -150,29 +161,8 @@ export default function ProfileDetailScreen() {
         style={StyleSheet.absoluteFill}
       />
 
-      {/* Header Background Accent */}
-      <View style={styles.headerBg} />
-
       <SafeAreaView style={styles.safeArea}>
-        {/* Top Bar */}
-        <View style={styles.topBar}>
-          <Pressable onPress={() => router.back()} style={styles.iconButton}>
-            <Ionicons name="arrow-back" size={24} color={colors.textPrimary} />
-          </Pressable>
-          <View style={styles.topBarActions}>
-            <Pressable onPress={handleShare} style={styles.iconButton}>
-              <Ionicons name="share-outline" size={24} color={colors.textPrimary} />
-            </Pressable>
-            {isOwnProfile && (
-              <Pressable
-                onPress={() => router.push('/profile')}
-                style={styles.iconButton}
-              >
-                <Ionicons name="pencil-outline" size={24} color={colors.textPrimary} />
-              </Pressable>
-            )}
-          </View>
-        </View>
+        <Header showCreate={false} />
 
         <ScrollView
           style={styles.scrollView}
@@ -197,9 +187,15 @@ export default function ProfileDetailScreen() {
                 <Text style={styles.locationText}>{profile.location}</Text>
               </View>
             )}
+            
+            {/* Share Button */}
+            <Pressable onPress={handleShare} style={styles.shareBtn}>
+              <Ionicons name="share-outline" size={18} color={colors.primary} />
+              <Text style={styles.shareBtnText}>Share</Text>
+            </Pressable>
           </View>
 
-          {/* Quick Stats - only show if there's data */}
+          {/* Quick Stats */}
           {(profile.hours_available || profile.pay_preference || profile.pay_rate) && (
             <View style={styles.statsCard}>
               {profile.hours_available && (
@@ -207,9 +203,7 @@ export default function ProfileDetailScreen() {
                   <View style={styles.statIcon}>
                     <Ionicons name="time-outline" size={20} color={colors.accent} />
                   </View>
-                  <Text style={styles.statValue}>
-                    {profile.hours_available}
-                  </Text>
+                  <Text style={styles.statValue}>{profile.hours_available}</Text>
                   <Text style={styles.statLabel}>hrs/{profile.hours_frequency}</Text>
                 </View>
               )}
@@ -256,7 +250,7 @@ export default function ProfileDetailScreen() {
             </View>
           )}
 
-          {/* Contact - Move up for prominence */}
+          {/* Contact */}
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Get in Touch</Text>
             <View style={styles.contactButtons}>
@@ -331,7 +325,6 @@ export default function ProfileDetailScreen() {
                 </Text>
               </Pressable>
               
-              {/* URL display and copy button */}
               <View style={styles.urlContainer}>
                 <Text style={styles.urlText} numberOfLines={1}>
                   {getProfileUrl()}
@@ -345,7 +338,6 @@ export default function ProfileDetailScreen() {
                 </Pressable>
               </View>
               
-              {/* Open in new tab button */}
               <Pressable style={styles.openLinkButton} onPress={openProfileUrl}>
                 <Ionicons name="open-outline" size={18} color={colors.textPrimary} />
                 <Text style={styles.openLinkText}>Open Link</Text>
@@ -385,7 +377,7 @@ export default function ProfileDetailScreen() {
             </View>
           )}
 
-          {/* Create Your Own Card CTA - Always visible */}
+          {/* Create Your Own Card CTA */}
           <View style={styles.createOwnCard}>
             <Text style={styles.createOwnCardTitle}>Create Your Own NW20 Card</Text>
             <Text style={styles.createOwnCardSubtitle}>
@@ -404,16 +396,7 @@ export default function ProfileDetailScreen() {
             </Button>
           </View>
 
-          {/* NW20 Dashboard - Always visible */}
-          <Pressable 
-            style={styles.backToHome}
-            onPress={() => router.push('/')}
-          >
-            <Ionicons name="home-outline" size={18} color={colors.primary} />
-            <Text style={[styles.backToHomeText, { color: colors.primary }]}>TheNetwork20 Dashboard</Text>
-          </Pressable>
-
-          <View style={{ height: 50 }} />
+          <Footer />
         </ScrollView>
       </SafeAreaView>
     </View>
@@ -442,40 +425,6 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     marginTop: spacing.lg,
   },
-
-  // Header BG
-  headerBg: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 200,
-    backgroundColor: colors.primary,
-    opacity: 0.1,
-  },
-
-  // Top Bar
-  topBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  topBarActions: {
-    flexDirection: 'row',
-    gap: spacing.xs,
-  },
-  iconButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    backgroundColor: colors.bgCard,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  // Scroll
   scrollView: {
     flex: 1,
   },
@@ -517,6 +466,21 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.sm,
     color: colors.textMuted,
   },
+  shareBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.xs,
+    marginTop: spacing.md,
+    paddingVertical: spacing.sm,
+    paddingHorizontal: spacing.md,
+    borderRadius: radius.full,
+    backgroundColor: `${colors.primary}20`,
+  },
+  shareBtnText: {
+    fontSize: typography.sizes.sm,
+    color: colors.primary,
+    fontWeight: '600',
+  },
 
   // Stats Card
   statsCard: {
@@ -526,6 +490,8 @@ const styles = StyleSheet.create({
     padding: spacing.lg,
     gap: spacing.md,
     justifyContent: 'space-around',
+    borderWidth: 1,
+    borderColor: colors.bgElevated,
   },
   statBox: {
     alignItems: 'center',
@@ -584,6 +550,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.bgCard,
     padding: spacing.md,
     borderRadius: radius.md,
+    borderWidth: 1,
+    borderColor: colors.bgElevated,
   },
   contactButtonText: {
     fontSize: typography.sizes.md,
@@ -670,19 +638,6 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
     fontWeight: '600',
   },
-  backToHome: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.sm,
-    marginTop: spacing.xl,
-    paddingVertical: spacing.md,
-  },
-  backToHomeText: {
-    fontSize: typography.sizes.md,
-    color: colors.textMuted,
-    fontWeight: '500',
-  },
   editSection: {
     marginTop: spacing.xl,
     paddingTop: spacing.lg,
@@ -717,4 +672,3 @@ const styles = StyleSheet.create({
     marginTop: spacing.xs,
   },
 });
-

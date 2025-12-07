@@ -80,6 +80,47 @@ export interface Database {
           updated_at?: string
         }
       }
+      jobs: {
+        Row: {
+          id: string
+          company_name: string
+          job_title: string
+          description: string | null
+          skills_needed: string[]
+          pay_range: string | null
+          location: string | null
+          contact_email: string
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          company_name: string
+          job_title: string
+          description?: string | null
+          skills_needed?: string[]
+          pay_range?: string | null
+          location?: string | null
+          contact_email: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          company_name?: string
+          job_title?: string
+          description?: string | null
+          skills_needed?: string[]
+          pay_range?: string | null
+          location?: string | null
+          contact_email?: string
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
@@ -102,4 +143,8 @@ export interface SocialLink {
 export type Profile = Database['public']['Tables']['profiles']['Row']
 export type ProfileInsert = Database['public']['Tables']['profiles']['Insert']
 export type ProfileUpdate = Database['public']['Tables']['profiles']['Update']
+
+export type Job = Database['public']['Tables']['jobs']['Row']
+export type JobInsert = Database['public']['Tables']['jobs']['Insert']
+export type JobUpdate = Database['public']['Tables']['jobs']['Update']
 

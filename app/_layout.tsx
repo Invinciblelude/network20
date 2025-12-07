@@ -4,6 +4,8 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { View, Platform } from 'react-native';
 import { colors } from '../src/lib/theme';
+import { ToastProvider } from '../src/components/ui';
+import { AuthProvider } from '../src/context/AuthContext';
 
 export default function RootLayout() {
   const router = useRouter();
@@ -21,17 +23,21 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <SafeAreaProvider>
-      <View style={{ flex: 1, backgroundColor: colors.bg }}>
-        <StatusBar style="light" />
-        <Stack
-          screenOptions={{
-            headerShown: false,
-            contentStyle: { backgroundColor: colors.bg },
-            animation: 'slide_from_right',
-          }}
-        />
-      </View>
-    </SafeAreaProvider>
+    <AuthProvider>
+      <SafeAreaProvider>
+        <ToastProvider>
+          <View style={{ flex: 1, backgroundColor: colors.bg }}>
+            <StatusBar style="light" />
+            <Stack
+              screenOptions={{
+                headerShown: false,
+                contentStyle: { backgroundColor: colors.bg },
+                animation: 'slide_from_right',
+              }}
+            />
+          </View>
+        </ToastProvider>
+      </SafeAreaProvider>
+    </AuthProvider>
   );
 }

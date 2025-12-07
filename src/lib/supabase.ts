@@ -1,10 +1,10 @@
 import 'react-native-url-polyfill/auto';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import type { Database, Profile, ProfileInsert, ProfileUpdate, SocialLink } from './database.types';
+import type { Database, Profile, ProfileInsert, ProfileUpdate, SocialLink, Job, JobInsert } from './database.types';
 
 // Re-export types for convenience
-export type { Profile, ProfileInsert, ProfileUpdate, SocialLink };
+export type { Profile, ProfileInsert, ProfileUpdate, SocialLink, Job, JobInsert };
 
 // Supabase credentials (anon key is designed to be public)
 const supabaseUrl = 'https://gaunbvghpechybavxtdp.supabase.co';
@@ -196,7 +196,7 @@ export async function getCurrentUserProfile(): Promise<Profile | null> {
 }
 
 /**
- * Create a new profile (no auth required)
+ * Create a new profile (links to authenticated user if logged in)
  */
 export async function createProfile(profileData: Omit<ProfileInsert, 'id' | 'user_id'>): Promise<Profile | null> {
   if (!supabase) {
@@ -204,13 +204,17 @@ export async function createProfile(profileData: Omit<ProfileInsert, 'id' | 'use
     return null;
   }
   
-  console.log('Creating profile in Supabase...', profileData.display_name);
+  // Get current authenticated user (if any)
+  const authUser = await getCurrentAuthUser();
+  const userId = authUser?.id || null;
+  
+  console.log('Creating profile in Supabase...', profileData.display_name, 'User:', userId || 'anonymous');
   
   const { data, error } = await supabase
     .from('profiles')
     .insert({
       ...profileData,
-      user_id: null, // Anonymous profile
+      user_id: userId, // Link to authenticated user or null for anonymous
     })
     .select()
     .single();
@@ -324,6 +328,99 @@ export async function getAvailableProfiles(): Promise<Profile[]> {
   
   if (error) {
     console.error('Error fetching available profiles:', error);
+    return [];
+  }
+  
+  return data || [];
+}
+
+// ============================================
+// JOB HELPERS
+// ============================================
+
+/**
+ * Get all active jobs
+ */
+export async function getJobs(): Promise<Job[]> {
+  if (!supabase) return [];
+  
+  const { data, error } = await supabase
+    .from('jobs')
+    .select('*')
+    .eq('is_active', true)
+    .order('created_at', { ascending: false });
+  
+  if (error) {
+    console.error('Error fetching jobs:', error);
+    return [];
+  }
+  
+  return data || [];
+}
+
+/**
+ * Get a single job by ID
+ */
+export async function getJob(id: string): Promise<Job | null> {
+  if (!supabase) return null;
+  
+  const { data, error } = await supabase
+    .from('jobs')
+    .select('*')
+    .eq('id', id)
+    .single();
+  
+  if (error) {
+    console.error('Error fetching job:', error);
+    return null;
+  }
+  
+  return data;
+}
+
+/**
+ * Create a new job posting
+ */
+export async function createJob(jobData: Omit<JobInsert, 'id'>): Promise<Job | null> {
+  if (!supabase) {
+    console.error('Supabase not configured - cannot create job');
+    return null;
+  }
+  
+  console.log('Creating job in Supabase...', jobData.job_title);
+  
+  const { data, error } = await supabase
+    .from('jobs')
+    .insert(jobData)
+    .select()
+    .single();
+  
+  if (error) {
+    console.error('Error creating job:', error);
+    throw error;
+  }
+  
+  console.log('Job created successfully:', data?.id);
+  return data;
+}
+
+/**
+ * Search jobs by query text
+ */
+export async function searchJobs(query: string): Promise<Job[]> {
+  if (!supabase) return [];
+  
+  const searchTerm = `%${query}%`;
+  
+  const { data, error } = await supabase
+    .from('jobs')
+    .select('*')
+    .eq('is_active', true)
+    .or(`job_title.ilike.${searchTerm},company_name.ilike.${searchTerm},description.ilike.${searchTerm},location.ilike.${searchTerm}`)
+    .order('created_at', { ascending: false });
+  
+  if (error) {
+    console.error('Error searching jobs:', error);
     return [];
   }
   

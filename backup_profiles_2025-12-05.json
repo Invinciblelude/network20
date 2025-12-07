@@ -1,0 +1,150 @@
+[
+  {
+    "id": "afb00d12-1d90-47c0-b589-900944f01755",
+    "user_id": null,
+    "display_name": "Dang Theory",
+    "tagline": "Test 2",
+    "skills": [
+      "React"
+    ],
+    "hours_available": 20,
+    "hours_frequency": "week",
+    "pay_preference": null,
+    "pay_rate": null,
+    "location": "Sac town",
+    "contact_email": null,
+    "contact_phone": null,
+    "social_links": [],
+    "bio": "Test",
+    "avatar_url": null,
+    "resume_url": null,
+    "is_available": true,
+    "is_public": true,
+    "created_at": "2025-12-04T22:46:51.163817+00:00",
+    "updated_at": "2025-12-04T22:46:51.163817+00:00"
+  },
+  {
+    "id": "b9565676-b5fc-4af5-8af6-9c98a45894e8",
+    "user_id": null,
+    "display_name": "Dang Theory",
+    "tagline": "Sci-tech guy",
+    "skills": [
+      "Research, code, videos, reading stock trading"
+    ],
+    "hours_available": 20,
+    "hours_frequency": "week",
+    "pay_preference": "project",
+    "pay_rate": null,
+    "location": "The internet",
+    "contact_email": "dangtheory1@gmail.com",
+    "contact_phone": null,
+    "social_links": [
+      {
+        "handle": "dangtheory.com",
+        "platform": "website"
+      },
+      {
+        "handle": "dangtheory",
+        "platform": "twitter"
+      }
+    ],
+    "bio": "Science is a way to truth and empowers us to solve problems creating technology",
+    "avatar_url": null,
+    "resume_url": "dangtheory.com",
+    "is_available": true,
+    "is_public": true,
+    "created_at": "2025-12-04T22:21:36.221792+00:00",
+    "updated_at": "2025-12-04T22:21:36.221792+00:00"
+  },
+  {
+    "id": "0b4ee48e-6e23-4846-a591-7547cb38771b",
+    "user_id": null,
+    "display_name": "Kyle",
+    "tagline": "Carpenter",
+    "skills": [
+      "Carpenter",
+      "Plumbing",
+      "Drywall",
+      "Landscape",
+      "Decks",
+      "Electrical",
+      "Windows",
+      "Siding",
+      "Interior/exterior painting",
+      "Flooring"
+    ],
+    "hours_available": 40,
+    "hours_frequency": "week",
+    "pay_preference": "hourly",
+    "pay_rate": null,
+    "location": "Roseville, California",
+    "contact_email": "webberkyle200@gmail.com",
+    "contact_phone": "9169046930",
+    "social_links": [],
+    "bio": "Hard working family man",
+    "avatar_url": null,
+    "resume_url": null,
+    "is_available": true,
+    "is_public": true,
+    "created_at": "2025-12-04T17:39:47.363799+00:00",
+    "updated_at": "2025-12-04T17:39:47.363799+00:00"
+  },
+  {
+    "id": "7f7edc84-06f4-41b1-ad38-0950716ed3b1",
+    "user_id": null,
+    "display_name": "Source",
+    "tagline": "Consultation",
+    "skills": [
+      "I am able to use technology and my creativity to help businesses. I am resourceful."
+    ],
+    "hours_available": 20,
+    "hours_frequency": "week",
+    "pay_preference": "hourly",
+    "pay_rate": "100",
+    "location": "Northern California",
+    "contact_email": "nestinghomesolutios@gmail.com",
+    "contact_phone": "7072478671",
+    "social_links": [
+      {
+        "handle": "genzmentorship.com",
+        "platform": "website"
+      }
+    ],
+    "bio": "I am very out going. I would like to be part of cool businesses.",
+    "avatar_url": null,
+    "resume_url": "https://genzmentorship.com/mentor",
+    "is_available": true,
+    "is_public": true,
+    "created_at": "2025-12-04T11:45:19.296084+00:00",
+    "updated_at": "2025-12-04T11:45:19.296084+00:00"
+  },
+  {
+    "id": "8c20b025-11cb-4982-bb2d-bda94f04ac54",
+    "user_id": null,
+    "display_name": "Vince D",
+    "tagline": "Aquistion Developer",
+    "skills": [
+      "I am skilled in alot of trades. I like buying land and getting them built!"
+    ],
+    "hours_available": 40,
+    "hours_frequency": "week",
+    "pay_preference": "negotiable",
+    "pay_rate": "250k a year",
+    "location": "Sacramento Ca",
+    "contact_email": "nestinghome916@gmail.com",
+    "contact_phone": "9154082256",
+    "social_links": [
+      {
+        "handle": "nestinghomesolutions.com",
+        "platform": "website"
+      }
+    ],
+    "bio": "I like sports and love to stay Busy with work!",
+    "avatar_url": null,
+    "resume_url": "https://www.nestinghomesolutions.com/experience",
+    "is_available": true,
+    "is_public": true,
+    "created_at": "2025-12-04T11:20:16.983965+00:00",
+    "updated_at": "2025-12-04T11:20:16.983965+00:00"
+  }
+]

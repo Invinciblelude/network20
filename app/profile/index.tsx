@@ -12,7 +12,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius, typography } from '../../src/lib/theme';
-import { Avatar, Button } from '../../src/components/ui';
+import { Avatar, Button, ConfirmModal, useToast } from '../../src/components/ui';
 import {
   getCurrentUser,
   updateProfile,
@@ -20,12 +20,17 @@ import {
   setCurrentUserId,
   type Profile,
 } from '../../src/lib/store';
+import { useAuth } from '../../src/context/AuthContext';
 
 export default function EditProfileScreen() {
   const router = useRouter();
+  const { showToast } = useToast();
+  const { user: authUser, signOut } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showLogoutModal, setShowLogoutModal] = useState(false);
 
   // Form state
   const [displayName, setDisplayName] = useState('');
@@ -76,22 +81,21 @@ export default function EditProfileScreen() {
         resume_url: resumeUrl.trim() || null,
         is_available: isAvailable,
       });
+      showToast('Profile saved', 'success');
       router.back();
     } catch (error) {
       console.error('Failed to save:', error);
+      showToast('Failed to save', 'error');
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = async () => {
-    const confirmed = typeof window !== 'undefined'
-      ? window.confirm('Delete this card? This cannot be undone.')
-      : true;
-    
-    if (confirmed && profile) {
+    if (profile) {
       await deleteProfile(profile.id);
       await setCurrentUserId(null);
+      showToast('Card deleted', 'success');
       router.replace('/');
     }
   };
@@ -99,6 +103,18 @@ export default function EditProfileScreen() {
   const handleSwitchCard = async () => {
     await setCurrentUserId(null);
     router.replace('/my-cards');
+  };
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+      await setCurrentUserId(null);
+      showToast('Logged out successfully', 'success');
+      router.replace('/');
+    } catch (error) {
+      console.error('Failed to logout:', error);
+      showToast('Failed to logout', 'error');
+    }
   };
 
   if (loading) {
@@ -271,13 +287,30 @@ export default function EditProfileScreen() {
               <Ionicons name="swap-horizontal-outline" size={20} color={colors.accent} />
               <Text style={[styles.dangerButtonText, { color: colors.accent }]}>Switch to Another Card</Text>
             </Pressable>
-            <Pressable style={styles.dangerButton} onPress={handleDelete}>
+            <Pressable style={styles.dangerButton} onPress={() => setShowDeleteModal(true)}>
               <Ionicons name="trash-outline" size={20} color={colors.error} />
               <Text style={[styles.dangerButtonText, { color: colors.error }]}>
                 Delete This Card
               </Text>
             </Pressable>
           </View>
+
+          {/* Account Section - Only show if logged in */}
+          {authUser && (
+            <View style={styles.accountSection}>
+              <Text style={styles.dangerTitle}>Account</Text>
+              <View style={styles.accountInfo}>
+                <Ionicons name="mail-outline" size={18} color={colors.textMuted} />
+                <Text style={styles.accountEmail}>{authUser.email}</Text>
+              </View>
+              <Pressable style={styles.dangerButton} onPress={() => setShowLogoutModal(true)}>
+                <Ionicons name="log-out-outline" size={20} color={colors.warning} />
+                <Text style={[styles.dangerButtonText, { color: colors.warning }]}>
+                  Sign Out
+                </Text>
+              </Pressable>
+            </View>
+          )}
 
           {/* Back to Directory */}
           <Pressable 
@@ -291,6 +324,25 @@ export default function EditProfileScreen() {
           <View style={{ height: 50 }} />
         </ScrollView>
       </SafeAreaView>
+      <ConfirmModal
+        visible={showDeleteModal}
+        title="Delete Card"
+        message="Delete this card? This cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={handleDelete}
+        onCancel={() => setShowDeleteModal(false)}
+        destructive
+      />
+      <ConfirmModal
+        visible={showLogoutModal}
+        title="Sign Out"
+        message="Are you sure you want to sign out?"
+        confirmText="Sign Out"
+        cancelText="Cancel"
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutModal(false)}
+      />
     </View>
   );
 }
@@ -447,6 +499,25 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.md,
     color: colors.textMuted,
     fontWeight: '500',
+  },
+
+  // Account Section
+  accountSection: {
+    marginTop: spacing.xl,
+    paddingTop: spacing.xl,
+    borderTopWidth: 1,
+    borderTopColor: colors.bgElevated,
+  },
+  accountInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    paddingVertical: spacing.sm,
+    marginBottom: spacing.sm,
+  },
+  accountEmail: {
+    fontSize: typography.sizes.sm,
+    color: colors.textMuted,
   },
 });
 
