@@ -222,7 +222,7 @@ export default function MyCardsScreen() {
                     )}
                     <Pressable
                       style={[styles.actionButton, styles.editButton]}
-                      onPress={() => router.push(`/profile`)}
+                      onPress={() => router.push(`/profile/edit/${profile.id}`)}
                     >
                       <Ionicons name="pencil-outline" size={20} color={colors.accent} />
                       <Text style={[styles.actionButtonText, { color: colors.accent }]}>

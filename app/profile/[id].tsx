@@ -364,7 +364,7 @@ export default function ProfileDetailScreen() {
             <View style={styles.editSection}>
               <Text style={styles.editHint}>This is your NW20 Card</Text>
               <Button
-                onPress={() => router.push('/profile')}
+                onPress={() => router.push(`/profile/edit/${profile.id}`)}
                 fullWidth
                 size="lg"
                 variant="secondary"
