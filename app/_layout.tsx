@@ -3,12 +3,13 @@ import { Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { View, Platform } from 'react-native';
-import { colors } from '../src/lib/theme';
 import { ToastProvider } from '../src/components/ui';
 import { AuthProvider } from '../src/context/AuthContext';
+import { ThemeProvider, useTheme } from '../src/context/ThemeContext';
 
-export default function RootLayout() {
+function RootLayoutContent() {
   const router = useRouter();
+  const { colors, isDark } = useTheme();
 
   // Handle GitHub Pages SPA redirect
   useEffect(() => {
@@ -23,21 +24,29 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <AuthProvider>
-      <SafeAreaProvider>
-        <ToastProvider>
-          <View style={{ flex: 1, backgroundColor: colors.bg }}>
-            <StatusBar style="light" />
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: colors.bg },
-                animation: 'slide_from_right',
-              }}
-            />
-          </View>
-        </ToastProvider>
-      </SafeAreaProvider>
-    </AuthProvider>
+    <View style={{ flex: 1, backgroundColor: colors.bg }}>
+      <StatusBar style={isDark ? 'light' : 'dark'} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          contentStyle: { backgroundColor: colors.bg },
+          animation: 'slide_from_right',
+        }}
+      />
+    </View>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <ThemeProvider>
+      <AuthProvider>
+        <SafeAreaProvider>
+          <ToastProvider>
+            <RootLayoutContent />
+          </ToastProvider>
+        </SafeAreaProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }

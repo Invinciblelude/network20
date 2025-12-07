@@ -1,10 +1,13 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { useRouter } from 'expo-router';
-import { colors, spacing, typography } from '../../lib/theme';
+import { spacing, typography } from '../../lib/theme';
+import { useTheme } from '../../context/ThemeContext';
 
 export function Footer() {
   const router = useRouter();
+  const { colors } = useTheme();
+  const styles = createStyles(colors);
 
   return (
     <View style={styles.footer}>
@@ -40,13 +43,14 @@ export function Footer() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   footer: {
     alignItems: 'center',
     paddingVertical: spacing.xl,
     borderTopWidth: 1,
     borderTopColor: colors.bgElevated,
     marginTop: spacing.xl,
+    backgroundColor: colors.bg,
   },
   footerText: {
     fontSize: typography.sizes.sm,
@@ -68,4 +72,3 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
   },
 });
-

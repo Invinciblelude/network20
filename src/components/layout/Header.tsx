@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, Pressable, useWindowDimensions, Modal } from 'react-native';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, radius, typography } from '../../lib/theme';
+import { spacing, radius, typography } from '../../lib/theme';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 
 interface HeaderProps {
   showCreate?: boolean;
@@ -13,6 +14,7 @@ export function Header({ showCreate = true }: HeaderProps) {
   const router = useRouter();
   const { width } = useWindowDimensions();
   const { user: authUser, loading: authLoading } = useAuth();
+  const { colors, toggleTheme, isDark } = useTheme();
   const [menuOpen, setMenuOpen] = useState(false);
 
   const isMobile = width < 768;
@@ -21,6 +23,9 @@ export function Header({ showCreate = true }: HeaderProps) {
     setMenuOpen(false);
     router.push(path as any);
   };
+
+  // Create styles with current theme colors
+  const styles = createStyles(colors);
 
   return (
     <View style={styles.header}>
@@ -35,6 +40,14 @@ export function Header({ showCreate = true }: HeaderProps) {
         <>
           {/* Mobile: Hamburger Menu */}
           <View style={styles.mobileActions}>
+            {/* Theme Toggle */}
+            <Pressable onPress={toggleTheme} style={styles.themeToggle}>
+              <Ionicons 
+                name={isDark ? 'sunny' : 'moon'} 
+                size={22} 
+                color={isDark ? colors.warning : colors.primary} 
+              />
+            </Pressable>
             {showCreate && (
               <Pressable onPress={() => navigateTo('/create')} style={styles.createCardBtn}>
                 <Ionicons name="add" size={20} color={colors.textInverse} />
@@ -93,6 +106,18 @@ export function Header({ showCreate = true }: HeaderProps) {
 
                 <View style={styles.mobileMenuDivider} />
 
+                {/* Theme Toggle in Menu */}
+                <Pressable style={styles.mobileNavLink} onPress={() => { toggleTheme(); setMenuOpen(false); }}>
+                  <Ionicons 
+                    name={isDark ? 'sunny' : 'moon'} 
+                    size={22} 
+                    color={isDark ? colors.warning : colors.primary} 
+                  />
+                  <Text style={styles.mobileNavLinkText}>
+                    {isDark ? 'Light Mode' : 'Dark Mode'}
+                  </Text>
+                </Pressable>
+
                 <Pressable style={styles.mobileNavLink} onPress={() => navigateTo('/my-cards')}>
                   <Ionicons name="card-outline" size={22} color={colors.textSecondary} />
                   <Text style={styles.mobileNavLinkText}>My Cards</Text>
@@ -143,6 +168,14 @@ export function Header({ showCreate = true }: HeaderProps) {
               <Text style={styles.navLinkText}>Sign In</Text>
             </Pressable>
           )}
+          {/* Theme Toggle */}
+          <Pressable onPress={toggleTheme} style={styles.themeToggle}>
+            <Ionicons 
+              name={isDark ? 'sunny' : 'moon'} 
+              size={20} 
+              color={isDark ? colors.warning : colors.primary} 
+            />
+          </Pressable>
           {showCreate && (
             <Pressable onPress={() => navigateTo('/create')} style={styles.createCardBtn}>
               <Text style={styles.createCardBtnText}>Create Card</Text>
@@ -154,7 +187,8 @@ export function Header({ showCreate = true }: HeaderProps) {
   );
 }
 
-const styles = StyleSheet.create({
+// Dynamic styles based on theme
+const createStyles = (colors: any) => StyleSheet.create({
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -163,6 +197,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: colors.bgElevated,
+    backgroundColor: colors.bg,
   },
   logoContainer: {
     flexDirection: 'row',
@@ -200,6 +235,11 @@ const styles = StyleSheet.create({
     fontSize: typography.sizes.sm,
     color: colors.textSecondary,
     fontWeight: '500',
+  },
+  themeToggle: {
+    padding: spacing.sm,
+    borderRadius: radius.md,
+    backgroundColor: colors.bgElevated,
   },
   createCardBtn: {
     backgroundColor: colors.primary,

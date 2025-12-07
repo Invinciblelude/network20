@@ -11,12 +11,15 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, radius, typography } from '../src/lib/theme';
+import { spacing, radius, typography } from '../src/lib/theme';
 import { Header } from '../src/components/layout/Header';
 import { Footer } from '../src/components/layout/Footer';
+import { useTheme } from '../src/context/ThemeContext';
 
 export default function PromotionsScreen() {
   const router = useRouter();
+  const { colors, gradientColors } = useTheme();
+  const styles = createStyles(colors);
 
   const openLink = (path: string) => {
     if (typeof window !== 'undefined') {
@@ -27,7 +30,7 @@ export default function PromotionsScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#1a0a0f', colors.bg, '#0a1a1f']}
+        colors={gradientColors as any}
         locations={[0, 0.5, 1]}
         style={StyleSheet.absoluteFill}
       />
@@ -223,7 +226,7 @@ export default function PromotionsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,

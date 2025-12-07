@@ -1,7 +1,10 @@
 // Network 20 - Bold & Distinctive Theme
-// Inspired by brutalist design meets warm human connection
+// Supports both dark and light mode
 
-export const colors = {
+export type ThemeMode = 'dark' | 'light';
+
+// Dark theme colors
+export const darkColors = {
   // Core palette - warm coral meets deep space
   primary: '#FF6B4A', // Vibrant coral
   primaryLight: '#FF8A70',
@@ -34,6 +37,54 @@ export const colors = {
   gradientAccent: '#00F5D4',
 };
 
+// Light theme colors
+export const lightColors = {
+  // Core palette - same primary for brand consistency
+  primary: '#FF6B4A',
+  primaryLight: '#FF8A70',
+  primaryDark: '#E54D2E',
+  
+  // Accent
+  accent: '#00B4A0',
+  accentMuted: '#00C4AA',
+  
+  // Backgrounds - clean and bright
+  bg: '#FFFFFF',
+  bgCard: '#F8F8FA',
+  bgElevated: '#F0F0F5',
+  bgInput: '#E8E8ED',
+  
+  // Text hierarchy
+  textPrimary: '#1A1A2E',
+  textSecondary: '#4A4A5A',
+  textMuted: '#8A8A9A',
+  textInverse: '#FFFFFF',
+  
+  // Status
+  success: '#00B4A0',
+  warning: '#F59E0B',
+  error: '#EF4444',
+  
+  // Gradients
+  gradientStart: '#FF6B4A',
+  gradientEnd: '#FF8A70',
+  gradientAccent: '#00B4A0',
+};
+
+// Default export for backward compatibility (dark mode)
+export const colors = darkColors;
+
+// Function to get colors based on theme
+export function getColors(mode: ThemeMode) {
+  return mode === 'light' ? lightColors : darkColors;
+}
+
+// Gradient backgrounds for each theme
+export const gradients = {
+  dark: ['#1a0a0f', '#0A0A0F', '#0a1a1f'] as const,
+  light: ['#fff5f3', '#FFFFFF', '#f3fff9'] as const,
+};
+
 export const spacing = {
   xs: 4,
   sm: 8,
@@ -52,8 +103,6 @@ export const radius = {
 };
 
 export const typography = {
-  // Using system fonts that look good, with fallbacks
-  // On web, we'll load custom fonts
   fontFamily: {
     regular: 'System',
     medium: 'System',
@@ -69,4 +118,3 @@ export const typography = {
     hero: 48,
   },
 };
-
