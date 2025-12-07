@@ -12,15 +12,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, radius, typography } from '../src/lib/theme';
+import { spacing, radius, typography } from '../src/lib/theme';
 import { Button, useToast } from '../src/components/ui';
 import { Header } from '../src/components/layout/Header';
 import { Footer } from '../src/components/layout/Footer';
 import { createJob } from '../src/lib/supabase';
+import { useTheme } from '../src/context/ThemeContext';
 
 export default function HireScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const { colors, gradientColors } = useTheme();
   const { showToast } = useToast();
   const [showForm, setShowForm] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -77,10 +79,12 @@ export default function HireScreen() {
     }
   };
 
+  const styles = createStyles(colors);
+
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#0a1a1f', colors.bg, '#1a0a0f']}
+        colors={gradientColors as any}
         locations={[0, 0.5, 1]}
         style={StyleSheet.absoluteFill}
       />
@@ -336,7 +340,7 @@ export default function HireScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,

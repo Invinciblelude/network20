@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
 import {
   View,
   Text,
@@ -13,7 +13,8 @@ import {
   Modal,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { colors, spacing, radius, typography } from '../lib/theme';
+import { spacing, radius, typography, colors as defaultColors } from '../lib/theme';
+import { useTheme } from '../context/ThemeContext';
 
 // ===================
 // TOAST SYSTEM
@@ -35,13 +36,13 @@ const ToastContext = createContext<ToastContextType | null>(null);
 export function useToast() {
   const context = useContext(ToastContext);
   if (!context) {
-    // Return a no-op if not wrapped in provider (graceful fallback)
     return { showToast: () => {} };
   }
   return context;
 }
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
+  const { colors } = useTheme();
   const [toast, setToast] = useState<ToastState>({ message: '', type: 'info', visible: false });
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const timeoutRef = useRef<NodeJS.Timeout>();
@@ -79,41 +80,35 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
       {toast.visible && (
         <Animated.View
           style={[
-            toastStyles.container,
-            { opacity: fadeAnim, borderLeftColor: toastColors[toast.type] },
+            {
+              position: 'absolute',
+              bottom: 100,
+              left: 20,
+              right: 20,
+              backgroundColor: colors.bgElevated,
+              paddingVertical: spacing.md,
+              paddingHorizontal: spacing.lg,
+              borderRadius: radius.md,
+              borderLeftWidth: 4,
+              borderLeftColor: toastColors[toast.type],
+              shadowColor: '#000',
+              shadowOffset: { width: 0, height: 4 },
+              shadowOpacity: 0.3,
+              shadowRadius: 8,
+              elevation: 8,
+              zIndex: 9999,
+            },
+            { opacity: fadeAnim },
           ]}
         >
-          <Text style={toastStyles.text}>{toast.message}</Text>
+          <Text style={{ color: colors.textPrimary, fontSize: typography.sizes.md, fontWeight: '500' }}>
+            {toast.message}
+          </Text>
         </Animated.View>
       )}
     </ToastContext.Provider>
   );
 }
-
-const toastStyles = StyleSheet.create({
-  container: {
-    position: 'absolute',
-    bottom: 100,
-    left: 20,
-    right: 20,
-    backgroundColor: colors.bgElevated,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    borderRadius: radius.md,
-    borderLeftWidth: 4,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-    zIndex: 9999,
-  },
-  text: {
-    color: colors.textPrimary,
-    fontSize: typography.sizes.md,
-    fontWeight: '500',
-  },
-});
 
 // ===================
 // CONFIRM MODAL
@@ -139,21 +134,74 @@ export function ConfirmModal({
   onCancel,
   destructive = false,
 }: ConfirmModalProps) {
+  const { colors } = useTheme();
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onCancel}>
-      <Pressable style={confirmStyles.overlay} onPress={onCancel}>
-        <Pressable style={confirmStyles.modal} onPress={e => e.stopPropagation()}>
-          <Text style={confirmStyles.title}>{title}</Text>
-          <Text style={confirmStyles.message}>{message}</Text>
-          <View style={confirmStyles.buttons}>
-            <Pressable style={confirmStyles.cancelButton} onPress={onCancel}>
-              <Text style={confirmStyles.cancelText}>{cancelText}</Text>
+      <Pressable 
+        style={{
+          flex: 1,
+          backgroundColor: 'rgba(0,0,0,0.7)',
+          justifyContent: 'center',
+          alignItems: 'center',
+          padding: spacing.lg,
+        }} 
+        onPress={onCancel}
+      >
+        <Pressable 
+          style={{
+            backgroundColor: colors.bgCard,
+            borderRadius: radius.lg,
+            padding: spacing.xl,
+            width: '100%',
+            maxWidth: 340,
+          }} 
+          onPress={e => e.stopPropagation()}
+        >
+          <Text style={{
+            fontSize: typography.sizes.lg,
+            fontWeight: '700',
+            color: colors.textPrimary,
+            marginBottom: spacing.sm,
+          }}>{title}</Text>
+          <Text style={{
+            fontSize: typography.sizes.md,
+            color: colors.textSecondary,
+            marginBottom: spacing.xl,
+            lineHeight: 22,
+          }}>{message}</Text>
+          <View style={{ flexDirection: 'row', gap: spacing.sm }}>
+            <Pressable 
+              style={{
+                flex: 1,
+                backgroundColor: colors.bgElevated,
+                paddingVertical: spacing.md,
+                borderRadius: radius.md,
+                alignItems: 'center',
+              }} 
+              onPress={onCancel}
+            >
+              <Text style={{
+                color: colors.textSecondary,
+                fontWeight: '600',
+                fontSize: typography.sizes.md,
+              }}>{cancelText}</Text>
             </Pressable>
             <Pressable
-              style={[confirmStyles.confirmButton, destructive && confirmStyles.destructiveButton]}
+              style={{
+                flex: 1,
+                backgroundColor: destructive ? colors.error : colors.primary,
+                paddingVertical: spacing.md,
+                borderRadius: radius.md,
+                alignItems: 'center',
+              }}
               onPress={onConfirm}
             >
-              <Text style={[confirmStyles.confirmText, destructive && confirmStyles.destructiveText]}>
+              <Text style={{
+                color: destructive ? '#fff' : colors.textInverse,
+                fontWeight: '600',
+                fontSize: typography.sizes.md,
+              }}>
                 {confirmText}
               </Text>
             </Pressable>
@@ -164,69 +212,6 @@ export function ConfirmModal({
   );
 }
 
-const confirmStyles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: spacing.lg,
-  },
-  modal: {
-    backgroundColor: colors.bgCard,
-    borderRadius: radius.lg,
-    padding: spacing.xl,
-    width: '100%',
-    maxWidth: 340,
-  },
-  title: {
-    fontSize: typography.sizes.lg,
-    fontWeight: '700',
-    color: colors.textPrimary,
-    marginBottom: spacing.sm,
-  },
-  message: {
-    fontSize: typography.sizes.md,
-    color: colors.textSecondary,
-    marginBottom: spacing.xl,
-    lineHeight: 22,
-  },
-  buttons: {
-    flexDirection: 'row',
-    gap: spacing.sm,
-  },
-  cancelButton: {
-    flex: 1,
-    backgroundColor: colors.bgElevated,
-    paddingVertical: spacing.md,
-    borderRadius: radius.md,
-    alignItems: 'center',
-  },
-  cancelText: {
-    color: colors.textSecondary,
-    fontWeight: '600',
-    fontSize: typography.sizes.md,
-  },
-  confirmButton: {
-    flex: 1,
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.md,
-    borderRadius: radius.md,
-    alignItems: 'center',
-  },
-  confirmText: {
-    color: colors.textInverse,
-    fontWeight: '600',
-    fontSize: typography.sizes.md,
-  },
-  destructiveButton: {
-    backgroundColor: colors.error,
-  },
-  destructiveText: {
-    color: '#fff',
-  },
-});
-
 // ===================
 // CONTAINER
 // ===================
@@ -236,16 +221,18 @@ interface ContainerProps {
 }
 
 export function Container({ children, style }: ContainerProps) {
-  return <View style={[styles.container, style]}>{children}</View>;
+  const { colors } = useTheme();
+  return <View style={[{ flex: 1, backgroundColor: colors.bg }, style]}>{children}</View>;
 }
 
 // ===================
 // GRADIENT BACKGROUND
 // ===================
 export function GradientBg({ children }: { children: React.ReactNode }) {
+  const { gradientColors } = useTheme();
   return (
     <LinearGradient
-      colors={[colors.bg, '#12121a', colors.bg]}
+      colors={gradientColors as any}
       style={StyleSheet.absoluteFill}
     >
       {children}
@@ -263,10 +250,31 @@ interface CardProps {
 }
 
 export function Card({ children, style, variant = 'default' }: CardProps) {
-  const variantStyles = {
-    default: styles.card,
-    elevated: styles.cardElevated,
-    outlined: styles.cardOutlined,
+  const { colors } = useTheme();
+  
+  const variantStyles: Record<string, ViewStyle> = {
+    default: {
+      backgroundColor: colors.bgCard,
+      borderRadius: radius.lg,
+      padding: spacing.lg,
+    },
+    elevated: {
+      backgroundColor: colors.bgElevated,
+      borderRadius: radius.lg,
+      padding: spacing.lg,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.3,
+      shadowRadius: 8,
+      elevation: 8,
+    },
+    outlined: {
+      backgroundColor: 'transparent',
+      borderRadius: radius.lg,
+      padding: spacing.lg,
+      borderWidth: 1,
+      borderColor: colors.bgElevated,
+    },
   };
   
   return <View style={[variantStyles[variant], style]}>{children}</View>;
@@ -281,23 +289,60 @@ interface TextProps {
 }
 
 export function Title({ children, style }: TextProps) {
-  return <Text style={[styles.title, style]}>{children}</Text>;
+  const { colors } = useTheme();
+  return (
+    <Text style={[{
+      fontSize: typography.sizes.xxl,
+      fontWeight: '800',
+      color: colors.textPrimary,
+      letterSpacing: -0.5,
+    }, style]}>{children}</Text>
+  );
 }
 
 export function Subtitle({ children, style }: TextProps) {
-  return <Text style={[styles.subtitle, style]}>{children}</Text>;
+  const { colors } = useTheme();
+  return (
+    <Text style={[{
+      fontSize: typography.sizes.lg,
+      fontWeight: '600',
+      color: colors.textPrimary,
+    }, style]}>{children}</Text>
+  );
 }
 
 export function Body({ children, style }: TextProps) {
-  return <Text style={[styles.body, style]}>{children}</Text>;
+  const { colors } = useTheme();
+  return (
+    <Text style={[{
+      fontSize: typography.sizes.md,
+      color: colors.textSecondary,
+      lineHeight: 24,
+    }, style]}>{children}</Text>
+  );
 }
 
 export function Label({ children, style }: TextProps) {
-  return <Text style={[styles.label, style]}>{children}</Text>;
+  const { colors } = useTheme();
+  return (
+    <Text style={[{
+      fontSize: typography.sizes.sm,
+      fontWeight: '600',
+      color: colors.textSecondary,
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
+    }, style]}>{children}</Text>
+  );
 }
 
 export function Muted({ children, style }: TextProps) {
-  return <Text style={[styles.muted, style]}>{children}</Text>;
+  const { colors } = useTheme();
+  return (
+    <Text style={[{
+      fontSize: typography.sizes.sm,
+      color: colors.textMuted,
+    }, style]}>{children}</Text>
+  );
 }
 
 // ===================
@@ -324,34 +369,59 @@ export function Button({
   style,
   fullWidth = false,
 }: ButtonProps) {
-  const buttonStyles = [
-    styles.button,
-    styles[`button_${variant}`],
-    styles[`button_${size}`],
-    fullWidth && styles.buttonFullWidth,
-    disabled && styles.buttonDisabled,
-    style,
-  ];
-  
-  const textStyles = [
-    styles.buttonText,
-    styles[`buttonText_${variant}`],
-    styles[`buttonText_${size}`],
-  ];
-  
+  const { colors } = useTheme();
+
+  const variantStyles: Record<string, ViewStyle> = {
+    primary: { backgroundColor: colors.primary },
+    secondary: { backgroundColor: colors.bgElevated, borderWidth: 1, borderColor: colors.textMuted },
+    ghost: { backgroundColor: 'transparent' },
+    accent: { backgroundColor: colors.accent },
+  };
+
+  const sizeStyles: Record<string, ViewStyle> = {
+    sm: { paddingVertical: spacing.sm, paddingHorizontal: spacing.md, minHeight: 36 },
+    md: { paddingVertical: spacing.md, paddingHorizontal: spacing.lg, minHeight: 48 },
+    lg: { paddingVertical: spacing.lg, paddingHorizontal: spacing.xl, minHeight: 56 },
+  };
+
+  const textColors: Record<string, string> = {
+    primary: colors.textInverse,
+    secondary: colors.textPrimary,
+    ghost: colors.primary,
+    accent: colors.textInverse,
+  };
+
+  const textSizes: Record<string, number> = {
+    sm: typography.sizes.sm,
+    md: typography.sizes.md,
+    lg: typography.sizes.lg,
+  };
+
   return (
     <Pressable
       onPress={onPress}
       disabled={disabled || loading}
       style={({ pressed }) => [
-        ...buttonStyles,
-        pressed && styles.buttonPressed,
+        {
+          borderRadius: radius.full,
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexDirection: 'row',
+        },
+        variantStyles[variant],
+        sizeStyles[size],
+        fullWidth && { width: '100%' },
+        disabled && { opacity: 0.5 },
+        pressed && { opacity: 0.85, transform: [{ scale: 0.98 }] },
+        style,
       ]}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? colors.textInverse : colors.textPrimary} />
+        <ActivityIndicator color={textColors[variant]} />
       ) : (
-        <Text style={textStyles}>{children}</Text>
+        <Text style={{ fontWeight: '700', color: textColors[variant], fontSize: textSizes[size] }}>
+          {children}
+        </Text>
       )}
     </Pressable>
   );
@@ -367,15 +437,41 @@ interface InputProps extends TextInputProps {
 }
 
 export function Input({ label, error, containerStyle, style, ...props }: InputProps) {
+  const { colors } = useTheme();
+  
   return (
-    <View style={[styles.inputContainer, containerStyle]}>
-      {label && <Text style={styles.inputLabel}>{label}</Text>}
+    <View style={[{ marginBottom: spacing.md }, containerStyle]}>
+      {label && (
+        <Text style={{
+          fontSize: typography.sizes.sm,
+          fontWeight: '600',
+          color: colors.textSecondary,
+          marginBottom: spacing.xs,
+        }}>{label}</Text>
+      )}
       <TextInput
-        style={[styles.input, error && styles.inputError, style]}
+        style={[
+          {
+            backgroundColor: colors.bgInput,
+            borderRadius: radius.md,
+            padding: spacing.md,
+            fontSize: typography.sizes.md,
+            color: colors.textPrimary,
+            borderWidth: 1,
+            borderColor: error ? colors.error : 'transparent',
+          },
+          style,
+        ]}
         placeholderTextColor={colors.textMuted}
         {...props}
       />
-      {error && <Text style={styles.inputErrorText}>{error}</Text>}
+      {error && (
+        <Text style={{
+          fontSize: typography.sizes.xs,
+          color: colors.error,
+          marginTop: spacing.xs,
+        }}>{error}</Text>
+      )}
     </View>
   );
 }
@@ -390,20 +486,45 @@ interface ChipProps {
 }
 
 export function Chip({ children, variant = 'default', onPress }: ChipProps) {
-  const chipStyles = [styles.chip, styles[`chip_${variant}`]];
-  const textStyles = [styles.chipText, styles[`chipText_${variant}`]];
-  
+  const { colors } = useTheme();
+
+  const variantStyles: Record<string, ViewStyle> = {
+    default: { backgroundColor: colors.bgElevated },
+    primary: { backgroundColor: `${colors.primary}20` },
+    accent: { backgroundColor: `${colors.accent}20` },
+  };
+
+  const textColors: Record<string, string> = {
+    default: colors.textSecondary,
+    primary: colors.primary,
+    accent: colors.accent,
+  };
+
+  const chipStyle: ViewStyle = {
+    paddingVertical: spacing.xs,
+    paddingHorizontal: spacing.sm,
+    borderRadius: radius.full,
+    alignSelf: 'flex-start',
+    ...variantStyles[variant],
+  };
+
+  const textStyle: TextStyle = {
+    fontSize: typography.sizes.sm,
+    fontWeight: '600',
+    color: textColors[variant],
+  };
+
   if (onPress) {
     return (
-      <Pressable onPress={onPress} style={chipStyles}>
-        <Text style={textStyles}>{children}</Text>
+      <Pressable onPress={onPress} style={chipStyle}>
+        <Text style={textStyle}>{children}</Text>
       </Pressable>
     );
   }
   
   return (
-    <View style={chipStyles}>
-      <Text style={textStyles}>{children}</Text>
+    <View style={chipStyle}>
+      <Text style={textStyle}>{children}</Text>
     </View>
   );
 }
@@ -418,6 +539,7 @@ interface AvatarProps {
 }
 
 export function Avatar({ name, size = 48, imageUrl }: AvatarProps) {
+  const { colors } = useTheme();
   const initials = name
     .split(' ')
     .map(n => n[0])
@@ -432,17 +554,18 @@ export function Avatar({ name, size = 48, imageUrl }: AvatarProps) {
   
   return (
     <View
-      style={[
-        styles.avatar,
-        {
-          width: size,
-          height: size,
-          borderRadius: size / 2,
-          backgroundColor: bgColors[colorIndex],
-        },
-      ]}
+      style={{
+        width: size,
+        height: size,
+        borderRadius: size / 2,
+        backgroundColor: bgColors[colorIndex],
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
     >
-      <Text style={[styles.avatarText, { fontSize: size * 0.4 }]}>{initials}</Text>
+      <Text style={{ fontWeight: '700', color: colors.textInverse, fontSize: size * 0.4 }}>
+        {initials}
+      </Text>
     </View>
   );
 }
@@ -451,7 +574,14 @@ export function Avatar({ name, size = 48, imageUrl }: AvatarProps) {
 // DIVIDER
 // ===================
 export function Divider({ style }: { style?: ViewStyle }) {
-  return <View style={[styles.divider, style]} />;
+  const { colors } = useTheme();
+  return (
+    <View style={[{
+      height: 1,
+      backgroundColor: colors.bgElevated,
+      marginVertical: spacing.md,
+    }, style]} />
+  );
 }
 
 // ===================
@@ -463,261 +593,28 @@ interface BadgeProps {
 }
 
 export function Badge({ children, variant = 'info' }: BadgeProps) {
+  const { colors } = useTheme();
+
+  const variantStyles: Record<string, { bg: string; text: string }> = {
+    success: { bg: `${colors.success}20`, text: colors.success },
+    warning: { bg: `${colors.warning}20`, text: colors.warning },
+    error: { bg: `${colors.error}20`, text: colors.error },
+    info: { bg: `${colors.accent}20`, text: colors.accent },
+  };
+
   return (
-    <View style={[styles.badge, styles[`badge_${variant}`]]}>
-      <Text style={[styles.badgeText, styles[`badgeText_${variant}`]]}>{children}</Text>
+    <View style={{
+      paddingVertical: 2,
+      paddingHorizontal: spacing.sm,
+      borderRadius: radius.sm,
+      alignSelf: 'flex-start',
+      backgroundColor: variantStyles[variant].bg,
+    }}>
+      <Text style={{
+        fontSize: typography.sizes.xs,
+        fontWeight: '700',
+        color: variantStyles[variant].text,
+      }}>{children}</Text>
     </View>
   );
 }
-
-// ===================
-// STYLES
-// ===================
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.bg,
-  },
-  
-  // Card
-  card: {
-    backgroundColor: colors.bgCard,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-  },
-  cardElevated: {
-    backgroundColor: colors.bgElevated,
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  cardOutlined: {
-    backgroundColor: 'transparent',
-    borderRadius: radius.lg,
-    padding: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.bgElevated,
-  },
-  
-  // Typography
-  title: {
-    fontSize: typography.sizes.xxl,
-    fontWeight: '800',
-    color: colors.textPrimary,
-    letterSpacing: -0.5,
-  },
-  subtitle: {
-    fontSize: typography.sizes.lg,
-    fontWeight: '600',
-    color: colors.textPrimary,
-  },
-  body: {
-    fontSize: typography.sizes.md,
-    color: colors.textSecondary,
-    lineHeight: 24,
-  },
-  label: {
-    fontSize: typography.sizes.sm,
-    fontWeight: '600',
-    color: colors.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  muted: {
-    fontSize: typography.sizes.sm,
-    color: colors.textMuted,
-  },
-  
-  // Button base
-  button: {
-    borderRadius: radius.full,
-    alignItems: 'center',
-    justifyContent: 'center',
-    flexDirection: 'row',
-  },
-  buttonFullWidth: {
-    width: '100%',
-  },
-  buttonPressed: {
-    opacity: 0.85,
-    transform: [{ scale: 0.98 }],
-  },
-  buttonDisabled: {
-    opacity: 0.5,
-  },
-  
-  // Button variants
-  button_primary: {
-    backgroundColor: colors.primary,
-  },
-  button_secondary: {
-    backgroundColor: colors.bgElevated,
-    borderWidth: 1,
-    borderColor: colors.textMuted,
-  },
-  button_ghost: {
-    backgroundColor: 'transparent',
-  },
-  button_accent: {
-    backgroundColor: colors.accent,
-  },
-  
-  // Button sizes
-  button_sm: {
-    paddingVertical: spacing.sm,
-    paddingHorizontal: spacing.md,
-    minHeight: 36,
-  },
-  button_md: {
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    minHeight: 48,
-  },
-  button_lg: {
-    paddingVertical: spacing.lg,
-    paddingHorizontal: spacing.xl,
-    minHeight: 56,
-  },
-  
-  // Button text
-  buttonText: {
-    fontWeight: '700',
-  },
-  buttonText_primary: {
-    color: colors.textInverse,
-  },
-  buttonText_secondary: {
-    color: colors.textPrimary,
-  },
-  buttonText_ghost: {
-    color: colors.primary,
-  },
-  buttonText_accent: {
-    color: colors.textInverse,
-  },
-  buttonText_sm: {
-    fontSize: typography.sizes.sm,
-  },
-  buttonText_md: {
-    fontSize: typography.sizes.md,
-  },
-  buttonText_lg: {
-    fontSize: typography.sizes.lg,
-  },
-  
-  // Input
-  inputContainer: {
-    marginBottom: spacing.md,
-  },
-  inputLabel: {
-    fontSize: typography.sizes.sm,
-    fontWeight: '600',
-    color: colors.textSecondary,
-    marginBottom: spacing.xs,
-  },
-  input: {
-    backgroundColor: colors.bgInput,
-    borderRadius: radius.md,
-    padding: spacing.md,
-    fontSize: typography.sizes.md,
-    color: colors.textPrimary,
-    borderWidth: 1,
-    borderColor: 'transparent',
-  },
-  inputError: {
-    borderColor: colors.error,
-  },
-  inputErrorText: {
-    fontSize: typography.sizes.xs,
-    color: colors.error,
-    marginTop: spacing.xs,
-  },
-  
-  // Chip
-  chip: {
-    paddingVertical: spacing.xs,
-    paddingHorizontal: spacing.sm,
-    borderRadius: radius.full,
-    alignSelf: 'flex-start',
-  },
-  chip_default: {
-    backgroundColor: colors.bgElevated,
-  },
-  chip_primary: {
-    backgroundColor: `${colors.primary}20`,
-  },
-  chip_accent: {
-    backgroundColor: `${colors.accent}20`,
-  },
-  chipText: {
-    fontSize: typography.sizes.sm,
-    fontWeight: '600',
-  },
-  chipText_default: {
-    color: colors.textSecondary,
-  },
-  chipText_primary: {
-    color: colors.primary,
-  },
-  chipText_accent: {
-    color: colors.accent,
-  },
-  
-  // Avatar
-  avatar: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  avatarText: {
-    fontWeight: '700',
-    color: colors.textInverse,
-  },
-  
-  // Divider
-  divider: {
-    height: 1,
-    backgroundColor: colors.bgElevated,
-    marginVertical: spacing.md,
-  },
-  
-  // Badge
-  badge: {
-    paddingVertical: 2,
-    paddingHorizontal: spacing.sm,
-    borderRadius: radius.sm,
-    alignSelf: 'flex-start',
-  },
-  badge_success: {
-    backgroundColor: `${colors.success}20`,
-  },
-  badge_warning: {
-    backgroundColor: `${colors.warning}20`,
-  },
-  badge_error: {
-    backgroundColor: `${colors.error}20`,
-  },
-  badge_info: {
-    backgroundColor: `${colors.accent}20`,
-  },
-  badgeText: {
-    fontSize: typography.sizes.xs,
-    fontWeight: '700',
-  },
-  badgeText_success: {
-    color: colors.success,
-  },
-  badgeText_warning: {
-    color: colors.warning,
-  },
-  badgeText_error: {
-    color: colors.error,
-  },
-  badgeText_info: {
-    color: colors.accent,
-  },
-});
-

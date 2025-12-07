@@ -12,14 +12,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, radius, typography } from '../src/lib/theme';
+import { spacing, radius, typography } from '../src/lib/theme';
 import { Avatar, Chip, Badge, Button } from '../src/components/ui';
 import { Header } from '../src/components/layout/Header';
 import { Footer } from '../src/components/layout/Footer';
 import { getProfiles, type Profile } from '../src/lib/store';
+import { useTheme } from '../src/context/ThemeContext';
 
 export default function DirectoryScreen() {
   const router = useRouter();
+  const { colors, gradientColors } = useTheme();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
@@ -52,10 +54,12 @@ export default function DirectoryScreen() {
     );
   });
 
+  const styles = createStyles(colors);
+
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#1a0a0f', colors.bg, '#0a1a1f']}
+        colors={gradientColors as any}
         locations={[0, 0.5, 1]}
         style={StyleSheet.absoluteFill}
       />
@@ -138,7 +142,7 @@ export default function DirectoryScreen() {
             </View>
           ) : (
             filteredProfiles.map((profile) => (
-              <ProfileCard key={profile.id} profile={profile} />
+              <ProfileCard key={profile.id} profile={profile} colors={colors} />
             ))
           )}
 
@@ -149,8 +153,9 @@ export default function DirectoryScreen() {
   );
 }
 
-function ProfileCard({ profile }: { profile: Profile }) {
+function ProfileCard({ profile, colors }: { profile: Profile; colors: any }) {
   const router = useRouter();
+  const styles = createStyles(colors);
   
   return (
     <Pressable
@@ -213,7 +218,7 @@ function ProfileCard({ profile }: { profile: Profile }) {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
@@ -391,4 +396,3 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
   },
 });
-

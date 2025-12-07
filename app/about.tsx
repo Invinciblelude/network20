@@ -10,18 +10,21 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, radius, typography } from '../src/lib/theme';
+import { spacing, radius, typography } from '../src/lib/theme';
 import { Button } from '../src/components/ui';
 import { Header } from '../src/components/layout/Header';
 import { Footer } from '../src/components/layout/Footer';
+import { useTheme } from '../src/context/ThemeContext';
 
 export default function AboutScreen() {
   const router = useRouter();
+  const { colors, gradientColors } = useTheme();
+  const styles = createStyles(colors);
 
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#1a0a0f', colors.bg, '#0a1a1f']}
+        colors={gradientColors as any}
         locations={[0, 0.5, 1]}
         style={StyleSheet.absoluteFill}
       />
@@ -143,7 +146,7 @@ export default function AboutScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,

@@ -13,9 +13,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, radius, typography } from '../src/lib/theme';
+import { spacing, radius, typography } from '../src/lib/theme';
 import { Button, Avatar } from '../src/components/ui';
 import { createProfile, setCurrentUserId, type SocialLink } from '../src/lib/store';
+import { useTheme } from '../src/context/ThemeContext';
 
 type PayPreference = 'hourly' | 'project' | 'salary' | 'negotiable';
 
@@ -36,6 +37,7 @@ const SOCIAL_PLATFORMS = [
 
 export default function CreateProfileScreen() {
   const router = useRouter();
+  const { colors, gradientColors } = useTheme();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -54,6 +56,8 @@ export default function CreateProfileScreen() {
   const [contactPhone, setContactPhone] = useState('');
   const [resumeUrl, setResumeUrl] = useState('');
   const [socialLinks, setSocialLinks] = useState<Record<string, string>>({});
+
+  const styles = createStyles(colors);
 
   const addSkill = () => {
     const skill = skillInput.trim();
@@ -118,7 +122,7 @@ export default function CreateProfileScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#1a0a0f', colors.bg, '#0a1a1f']}
+        colors={gradientColors as any}
         locations={[0, 0.5, 1]}
         style={StyleSheet.absoluteFill}
       />
@@ -499,7 +503,7 @@ export default function CreateProfileScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
@@ -746,4 +750,3 @@ const styles = StyleSheet.create({
     borderTopColor: colors.bgElevated,
   },
 });
-

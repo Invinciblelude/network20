@@ -12,13 +12,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, radius, typography } from '../../src/lib/theme';
+import { spacing, radius, typography } from '../../src/lib/theme';
 import { Avatar, Chip, Badge, Button } from '../../src/components/ui';
 import { Header } from '../../src/components/layout/Header';
 import { Footer } from '../../src/components/layout/Footer';
 import { QRCode } from '../../src/components/QRCode';
 import { getProfile, getCurrentUserId, type Profile } from '../../src/lib/store';
 import { useAuth } from '../../src/context/AuthContext';
+import { useTheme } from '../../src/context/ThemeContext';
 import { Platform } from 'react-native';
 
 const SOCIAL_ICONS: Record<string, string> = {
@@ -34,6 +35,7 @@ export default function ProfileDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { user: authUser } = useAuth();
+  const { colors, gradientColors } = useTheme();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
   const [isGuestOwner, setIsGuestOwner] = useState(false); // Owns via local storage but not signed in
@@ -134,6 +136,8 @@ export default function ProfileDetailScreen() {
     Linking.openURL(url);
   };
 
+  const styles = createStyles(colors);
+
   if (loading) {
     return (
       <View style={[styles.container, styles.centered]}>
@@ -146,7 +150,7 @@ export default function ProfileDetailScreen() {
     return (
       <View style={styles.container}>
         <LinearGradient
-          colors={['#1a0a0f', colors.bg, '#0a1a1f']}
+          colors={gradientColors as any}
           locations={[0, 0.5, 1]}
           style={StyleSheet.absoluteFill}
         />
@@ -167,7 +171,7 @@ export default function ProfileDetailScreen() {
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#1a0a0f', colors.bg, '#0a1a1f']}
+        colors={gradientColors as any}
         locations={[0, 0.3, 1]}
         style={StyleSheet.absoluteFill}
       />
@@ -454,7 +458,7 @@ export default function ProfileDetailScreen() {
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,

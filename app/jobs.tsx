@@ -13,14 +13,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
-import { colors, spacing, radius, typography } from '../src/lib/theme';
+import { spacing, radius, typography } from '../src/lib/theme';
 import { Button, Chip } from '../src/components/ui';
 import { Header } from '../src/components/layout/Header';
 import { Footer } from '../src/components/layout/Footer';
 import { getJobs, searchJobs, type Job } from '../src/lib/supabase';
+import { useTheme } from '../src/context/ThemeContext';
 
 export default function JobsScreen() {
   const router = useRouter();
+  const { colors, gradientColors } = useTheme();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [refreshing, setRefreshing] = useState(false);
@@ -50,10 +52,12 @@ export default function JobsScreen() {
     Linking.openURL(`mailto:${email}?subject=${subject}&body=${body}`);
   };
 
+  const styles = createStyles(colors);
+
   return (
     <View style={styles.container}>
       <LinearGradient
-        colors={['#0a1a1f', colors.bg, '#1a0a0f']}
+        colors={gradientColors as any}
         locations={[0, 0.5, 1]}
         style={StyleSheet.absoluteFill}
       />
@@ -143,7 +147,7 @@ export default function JobsScreen() {
           ) : (
             <>
               {jobs.map((job) => (
-                <JobCard key={job.id} job={job} onApply={handleApply} />
+                <JobCard key={job.id} job={job} onApply={handleApply} colors={colors} />
               ))}
 
               {/* Post Job CTA */}
@@ -167,8 +171,9 @@ export default function JobsScreen() {
 }
 
 // Job Card Component
-function JobCard({ job, onApply }: { job: Job; onApply: (email: string, title: string) => void }) {
+function JobCard({ job, onApply, colors }: { job: Job; onApply: (email: string, title: string) => void; colors: any }) {
   const [expanded, setExpanded] = useState(false);
+  const styles = createStyles(colors);
 
   return (
     <Pressable style={styles.jobCard} onPress={() => setExpanded(!expanded)}>
@@ -231,7 +236,7 @@ function JobCard({ job, onApply }: { job: Job; onApply: (email: string, title: s
   );
 }
 
-const styles = StyleSheet.create({
+const createStyles = (colors: any) => StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
