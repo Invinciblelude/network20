@@ -15,7 +15,7 @@ import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import { colors, spacing, radius, typography } from '../src/lib/theme';
 import { Button, Avatar } from '../src/components/ui';
-import { createProfile, getCurrentUserId, setCurrentUserId, type SocialLink } from '../src/lib/store';
+import { createProfile, setCurrentUserId, type SocialLink } from '../src/lib/store';
 
 type PayPreference = 'hourly' | 'project' | 'salary' | 'negotiable';
 
@@ -97,13 +97,11 @@ export default function CreateProfileScreen() {
         is_available: true,
       });
 
-      // Set as current user if it's the first profile, otherwise ask
-      const currentUserId = await getCurrentUserId();
-      if (!currentUserId) {
-        await setCurrentUserId(newProfile.id);
-      }
+      // Set as current user
+      await setCurrentUserId(newProfile.id);
 
-      router.replace('/');
+      // Take them to view their new card
+      router.replace(`/profile/${newProfile.id}`);
     } catch (error) {
       console.error('Failed to create profile:', error);
     } finally {
