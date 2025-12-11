@@ -36,6 +36,33 @@ export default function HomeScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
+          {/* Create Card CTA - Primary Focus */}
+          <View style={styles.createCardBanner}>
+            <LinearGradient
+              colors={[colors.primary, colors.accent]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.createCardGradient}
+            >
+              <View style={styles.createCardContent}>
+                <View style={styles.createCardIcon}>
+                  <Ionicons name="card-outline" size={40} color="#FFF" />
+                </View>
+                <Text style={styles.createCardTitle}>Create Your NW20 Card</Text>
+                <Text style={styles.createCardDesc}>
+                  Build your digital employment card in minutes. Showcase your skills, set your availability, and get discovered by employers.
+                </Text>
+                <Pressable
+                  style={styles.createCardBtn}
+                  onPress={() => router.push('/create')}
+                >
+                  <Ionicons name="add-circle" size={22} color={colors.primary} />
+                  <Text style={[styles.createCardBtnText, { color: colors.primary }]}>Start Building — It's Free</Text>
+                </Pressable>
+              </View>
+            </LinearGradient>
+          </View>
+
           {/* Hero Section */}
           <View style={styles.hero}>
             <Text style={styles.heroTagline}>Connecting Talent to Opportunity</Text>
@@ -162,6 +189,61 @@ const createStyles = (colors: any) => StyleSheet.create({
   },
   scrollContent: {
     paddingHorizontal: spacing.lg,
+  },
+  createCardBanner: {
+    marginTop: spacing.lg,
+    marginBottom: spacing.md,
+    borderRadius: radius.xl,
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  createCardGradient: {
+    borderRadius: radius.xl,
+  },
+  createCardContent: {
+    padding: spacing.xl,
+    alignItems: 'center',
+  },
+  createCardIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: spacing.md,
+  },
+  createCardTitle: {
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#FFF',
+    textAlign: 'center',
+    marginBottom: spacing.sm,
+  },
+  createCardDesc: {
+    fontSize: typography.sizes.md,
+    color: 'rgba(255,255,255,0.9)',
+    textAlign: 'center',
+    maxWidth: 500,
+    lineHeight: 24,
+    marginBottom: spacing.lg,
+  },
+  createCardBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: '#FFF',
+    paddingVertical: spacing.md,
+    paddingHorizontal: spacing.xl,
+    borderRadius: radius.lg,
+  },
+  createCardBtnText: {
+    fontSize: typography.sizes.md,
+    fontWeight: '700',
   },
   hero: {
     paddingVertical: spacing.xxl,
