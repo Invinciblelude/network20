@@ -184,6 +184,25 @@ export default function ProfileDetailScreen() {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
+          {/* Create Your Own Card CTA - TOP */}
+          <View style={styles.createOwnCard}>
+            <Text style={styles.createOwnCardTitle}>Create Your Own NW20 Card</Text>
+            <Text style={styles.createOwnCardSubtitle}>
+              Free digital work card in 60 seconds
+            </Text>
+            <Button
+              onPress={() => router.push('/create')}
+              fullWidth
+              size="lg"
+              style={{ marginTop: spacing.md }}
+            >
+              <Ionicons name="add-circle" size={20} color={colors.textInverse} style={{ marginRight: 8 }} />
+              <Text style={{ color: colors.textInverse, fontWeight: '700', fontSize: 16 }}>
+                Get Started
+              </Text>
+            </Button>
+          </View>
+
           {/* Profile Header */}
           <View style={styles.profileHeader}>
             <Avatar name={profile.display_name} size={100} />
@@ -431,25 +450,6 @@ export default function ProfileDetailScreen() {
               )}
             </View>
           )}
-
-          {/* Create Your Own Card CTA */}
-          <View style={styles.createOwnCard}>
-            <Text style={styles.createOwnCardTitle}>Create Your Own NW20 Card</Text>
-            <Text style={styles.createOwnCardSubtitle}>
-              Free digital work card in 60 seconds
-            </Text>
-            <Button
-              onPress={() => router.push('/create')}
-              fullWidth
-              size="lg"
-              style={{ marginTop: spacing.md }}
-            >
-              <Ionicons name="add-circle" size={20} color={colors.textInverse} style={{ marginRight: 8 }} />
-              <Text style={{ color: colors.textInverse, fontWeight: '700', fontSize: 16 }}>
-                Get Started
-              </Text>
-            </Button>
-          </View>
 
           <Footer />
         </ScrollView>
@@ -706,7 +706,8 @@ const createStyles = (colors: any) => StyleSheet.create({
     marginBottom: spacing.md,
   },
   createOwnCard: {
-    marginTop: spacing.xl,
+    marginTop: spacing.lg,
+    marginBottom: spacing.md,
     padding: spacing.lg,
     backgroundColor: colors.bgCard,
     borderRadius: radius.lg,
