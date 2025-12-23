@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="480" height="200" viewBox="0 0 480 200" role="img" aria-label="thenetwork20 logo">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1220"/>
+      <stop offset="100%" stop-color="#101828"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+    <filter id="blur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="22" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="480" height="200" rx="28" fill="url(#bg)"/>
+  <ellipse cx="120" cy="98" rx="78" ry="78" fill="none" stroke="url(#glow)" stroke-width="10" opacity="0.85" filter="url(#blur)"/>
+  <g transform="translate(60 34)" fill="none" stroke="#e5e7eb" stroke-linecap="round" stroke-linejoin="round" stroke-width="12">
+    <path d="M18 118 V26 L80 102 V26 L142 118"/>
+  </g>
+  <g transform="translate(60 34)">
+    <path d="M160 118 C160 90 182 70 210 70 C238 70 260 90 260 118 C260 146 238 166 210 166 C182 166 160 146 160 118 Z" fill="none" stroke="#22d3ee" stroke-width="10"/>
+  </g>
+  <text x="260" y="122" font-family="Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-size="34" font-weight="700" fill="#f8fafc" letter-spacing="0.5">
+    thenetwork
+    <tspan fill="url(#glow)">20</tspan>
+  </text>
+</svg>
+
